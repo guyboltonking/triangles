@@ -18,6 +18,37 @@ export class Position {
     }
 }
 
+export class BoundingBox {
+    topLeft: Position = new Position(0, 0);
+    bottomRight: Position = new Position(0, 0);
+
+    constructor(position: Position) {
+        this.topLeft.x = position.x;
+        this.topLeft.y = position.y;
+        this.bottomRight.x = position.x;
+        this.bottomRight.y = position.y;
+    }
+
+    expand(position: Position) {
+        this.topLeft.x = Math.min(this.topLeft.x, position.x);
+        this.topLeft.y = Math.min(this.topLeft.y, position.y);
+        this.bottomRight.x = Math.max(this.bottomRight.x, position.x);
+        this.bottomRight.y = Math.max(this.bottomRight.y, position.y);
+    }
+
+    origin(): Position {
+        return this.topLeft;
+    }
+
+    width(): number {
+        return this.bottomRight.x - this.topLeft.x;
+    }
+
+    height(): number {
+        return this.bottomRight.y - this.topLeft.y;
+    }
+}
+
 class State {
     players: Player[] = [];
     positions0: Position[] = [];
@@ -41,6 +72,19 @@ class State {
     positions(): Position[] {
         this.update();
         return this.positions0;
+    }
+
+    boundingBox(): BoundingBox {
+        let result: BoundingBox = null;
+        for (let position of this.positions()) {
+            if (result == null) {
+                result = new BoundingBox(position);
+            }
+            else {
+                result.expand(position);
+            }
+        }
+        return result;
     }
 }
 

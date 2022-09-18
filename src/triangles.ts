@@ -18,6 +18,20 @@ export class Position {
     }
 }
 
+export class ViewBox {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+
+    constructor(boundingBox: BoundingBox) {
+        this.x = boundingBox.topLeft.x;
+        this.y = boundingBox.topLeft.y;
+        this.width = boundingBox.bottomRight.x - boundingBox.topLeft.x;
+        this.height = boundingBox.bottomRight.y - boundingBox.topLeft.y;
+    }
+}
+
 export class BoundingBox {
     topLeft: Position = new Position(0, 0);
     bottomRight: Position = new Position(0, 0);

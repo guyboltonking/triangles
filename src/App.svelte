@@ -27,23 +27,41 @@
   });
 </script>
 
-<main>
+<div id="controls">
   <p>{fps}</p>
-  <svg
-    width="100%"
-    height="500px"
-    viewBox="{boundingBox.origin().x - 10} {boundingBox.origin().y -
-      10} {boundingBox.width() + 20} {boundingBox.height() + 20}"
-  >
-    {#each positions as position}
-      <circle cx={position.x} cy={position.y} r="2" />
-    {/each}
-  </svg>
-</main>
+</div>
+<svg
+  id="display"
+  viewBox="{boundingBox.origin().x - 10} {boundingBox.origin().y -
+    10} {boundingBox.width() + 20} {boundingBox.height() + 20}"
+>
+  <defs>
+    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+      <polyline points="0,100 0,0, 100,0" stroke="red" fill="none" />
+    </pattern>
+  </defs>
+  <rect
+    x={boundingBox.origin().x - 10}
+    y={boundingBox.origin().y - 10}
+    width={boundingBox.width() + 20}
+    height={boundingBox.height() + 20}
+    fill="url(#grid)"
+  />
+  {#each positions as position}
+    <circle cx={position.x} cy={position.y} r="2" />
+  {/each}
+</svg>
 
 <style>
-  svg {
-    width: 100%;
+  #controls {
+    flex: 0 0 auto;
+  }
+
+  #display {
     border: solid black 1px;
+    /* Don't use auto for the flex-basis: it causes the svg to grow in height to
+    suit the aspect ration of the viewBox, causing a nasty constantly resized
+    svg. */
+    flex: 1 1 0;
   }
 </style>

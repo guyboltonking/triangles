@@ -25,13 +25,38 @@
 
     return () => cancelAnimationFrame(frame);
   });
+
+  let display;
+  let displayWidth = 0;
+  let displayHeight = 0;
+
+  onMount(() => {
+    displayWidth = display.clientWidth;
+    displayHeight = display.clientHeight;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      // We don't care about the entries in this callback; we know it's been
+      // updated, just ask the component directly
+      displayWidth = display.clientWidth;
+      displayHeight = display.clientHeight;
+    });
+
+    resizeObserver.observe(display);
+
+    // This callback cleans up the observer
+    return () => resizeObserver.unobserve(display);
+  });
 </script>
 
 <div id="controls">
   <p>{fps}</p>
+  <p>{displayWidth}</p>
+  <p>{displayHeight}</p>
 </div>
+<!-- TODO: make the viewBox have the same aspect ratio as the svg -->
 <svg
   id="display"
+  bind:this={display}
   viewBox="{boundingBox.origin().x - 10} {boundingBox.origin().y -
     10} {boundingBox.width() + 20} {boundingBox.height() + 20}"
 >

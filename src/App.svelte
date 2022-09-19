@@ -4,8 +4,6 @@
 
   let lastLoop = 0;
   let fps = "";
-  let positions = state.positions();
-  let boundingBox = state.boundingBox();
 
   onMount(() => {
     let frame;
@@ -16,8 +14,7 @@
       if (elapsed != 0) {
         fps = (1000 / elapsed).toFixed();
       }
-      positions = state.positions();
-      boundingBox = state.boundingBox();
+      state.tick();
       frame = requestAnimationFrame(loop);
     };
 
@@ -57,8 +54,8 @@
 <svg
   id="display"
   bind:this={display}
-  viewBox="{boundingBox.origin().x - 10} {boundingBox.origin().y -
-    10} {boundingBox.width() + 20} {boundingBox.height() + 20}"
+  viewBox="{$state.viewBox.x} {$state.viewBox.y} {$state.viewBox.width} {$state
+    .viewBox.height}"
 >
   <defs>
     <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
@@ -66,13 +63,13 @@
     </pattern>
   </defs>
   <rect
-    x={boundingBox.origin().x - 10}
-    y={boundingBox.origin().y - 10}
-    width={boundingBox.width() + 20}
-    height={boundingBox.height() + 20}
+    x={$state.viewBox.x}
+    y={$state.viewBox.y}
+    width={$state.viewBox.width}
+    height={$state.viewBox.height}
     fill="url(#grid)"
   />
-  {#each positions as position}
+  {#each $state.positions() as position}
     <circle cx={position.x} cy={position.y} r="2" />
   {/each}
 </svg>

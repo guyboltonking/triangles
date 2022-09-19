@@ -1,3 +1,5 @@
+import { writable } from "svelte/store";
+
 type PlayerId = number;
 
 class Player {
@@ -67,6 +69,8 @@ class State {
     players: Player[] = [];
     positions0: Position[] = [];
     positions1: Position[] = [];
+    margin: number = 10;
+    viewBox: ViewBox = new ViewBox(new BoundingBox(new Position(0, 0)));
 
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
         this.players.push(new Player([following0, following1]));
@@ -80,15 +84,14 @@ class State {
             position.x += dx;
             position.y += dy;
         }
-
+        this.viewBox = new ViewBox(this.calculateBoundingBox());
     }
 
     positions(): Position[] {
-        this.update();
         return this.positions0;
     }
 
-    boundingBox(): BoundingBox {
+    private calculateBoundingBox(): BoundingBox {
         let result: BoundingBox = null;
         for (let position of this.positions()) {
             if (result == null) {
@@ -98,12 +101,21 @@ class State {
                 result.expand(position);
             }
         }
+        result.expand(new Position(result.topLeft.x - this.margin, result.topLeft.y - this.margin));
+        result.expand(new Position(result.bottomRight.x + this.margin, result.bottomRight.y + this.margin));
         return result;
     }
 }
 
-export let state = new State();
+let state_ = new State();
 
-state.addPlayer(1, 2, 10, 10);
-state.addPlayer(0, 2, 20, 10);
-state.addPlayer(0, 1, 10, 20);
+state_.addPlayer(1, 2, 10, 10);
+state_.addPlayer(0, 2, 20, 10);
+state_.addPlayer(0, 1, 10, 20);
+
+const { subscribe, set, update } = writable(state_)
+
+export let state = {
+    subscribe,
+    tick: () => update(state => { state.update(); return state }),
+};

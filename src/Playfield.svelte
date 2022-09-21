@@ -1,8 +1,10 @@
 <script>
     export let state;
     export let id;
-    export let width;
-    export let height;
+    let width;
+    let height;
+
+    $: state.updateDisplayDimensions(width, height);
 </script>
 
 <div {id} bind:clientWidth={width} bind:clientHeight={height}>

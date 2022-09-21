@@ -65,12 +65,54 @@ export class BoundingBox {
     }
 }
 
+class StateDisplay {
+    width: number = 0;
+    height: number = 0;
+    margin: number = 10;
+    viewBox: ViewBox = new ViewBox(new BoundingBox(new Position(0, 0)));
+    state: State;
+
+    constructor(state: State) {
+        this.state = state;
+    }
+
+    updatePositions(): StateDisplay {
+        this.state.update();
+        this.viewBox = this.calculateViewBox();
+        return this;
+    }
+
+    updateDisplayDimensions(width: number, height: number): StateDisplay {
+        this.width = width;
+        this.height = height;
+        return this;
+    }
+
+    positions(): Position[] {
+        return this.state.positions();
+    }
+
+    private calculateViewBox(): ViewBox {
+        let boundingBox = this.state.calculateBoundingBox();
+
+        boundingBox.expand(
+            new Position(
+                boundingBox.topLeft.x - this.margin,
+                boundingBox.topLeft.y - this.margin));
+
+        boundingBox.expand(
+            new Position(
+                boundingBox.bottomRight.x + this.margin,
+                boundingBox.bottomRight.y + this.margin));
+
+        return new ViewBox(boundingBox);
+    }
+}
+
 class State {
     players: Player[] = [];
     positions0: Position[] = [];
     positions1: Position[] = [];
-    margin: number = 10;
-    viewBox: ViewBox = new ViewBox(new BoundingBox(new Position(0, 0)));
 
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
         this.players.push(new Player([following0, following1]));
@@ -84,14 +126,13 @@ class State {
             position.x += dx;
             position.y += dy;
         }
-        this.viewBox = new ViewBox(this.calculateBoundingBox());
     }
 
     positions(): Position[] {
         return this.positions0;
     }
 
-    private calculateBoundingBox(): BoundingBox {
+    calculateBoundingBox(): BoundingBox {
         let result: BoundingBox = null;
         for (let position of this.positions()) {
             if (result == null) {
@@ -101,8 +142,6 @@ class State {
                 result.expand(position);
             }
         }
-        result.expand(new Position(result.topLeft.x - this.margin, result.topLeft.y - this.margin));
-        result.expand(new Position(result.bottomRight.x + this.margin, result.bottomRight.y + this.margin));
         return result;
     }
 }
@@ -113,9 +152,12 @@ state_.addPlayer(1, 2, 10, 10);
 state_.addPlayer(0, 2, 20, 10);
 state_.addPlayer(0, 1, 10, 20);
 
-const { subscribe, set, update } = writable(state_)
+const { subscribe, set, update } = writable(new StateDisplay(state_))
 
 export let state = {
     subscribe,
-    tick: () => update(state => { state.update(); return state }),
+    set,
+    updatePositions: () => update(state => state.updatePositions()),
+    updateDisplayDimensions: (width: number, height: number) =>
+        update(state => state.updateDisplayDimensions(width, height))
 };

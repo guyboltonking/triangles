@@ -27,10 +27,10 @@ export class ViewBox {
     height: number;
 
     constructor(boundingBox: BoundingBox) {
-        this.x = boundingBox.topLeft.x;
-        this.y = boundingBox.topLeft.y;
-        this.width = boundingBox.bottomRight.x - boundingBox.topLeft.x;
-        this.height = boundingBox.bottomRight.y - boundingBox.topLeft.y;
+        this.x = boundingBox.origin().x;
+        this.y = boundingBox.origin().y;
+        this.width = boundingBox.width();
+        this.height = boundingBox.height();
     }
 }
 
@@ -105,7 +105,31 @@ class StateDisplay {
                 boundingBox.bottomRight.x + this.margin,
                 boundingBox.bottomRight.y + this.margin));
 
-        return new ViewBox(boundingBox);
+        // Pad the BB to the same aspect ratio as the display
+
+        // Calculate the scaling factor we need to multiple the view by to get
+        // display.
+        let requiredWidth = this.width;
+        let requiredHeight = this.height;
+
+        let viewToDisplayScalingFactor = this.height / boundingBox.height();
+        if (viewToDisplayScalingFactor < 1) {
+            if (viewToDisplayScalingFactor * boundingBox.width() > this.width) {
+                viewToDisplayScalingFactor = this.width / boundingBox.width();
+            }
+
+            requiredWidth = this.width / viewToDisplayScalingFactor;
+            requiredHeight = this.height / viewToDisplayScalingFactor;
+        }
+
+        boundingBox.topLeft.x -= (requiredWidth - boundingBox.width()) / 2;
+        boundingBox.bottomRight.x += (requiredWidth - boundingBox.width())
+        boundingBox.topLeft.y -= (requiredHeight - boundingBox.height()) / 2;
+        boundingBox.bottomRight.y += (requiredHeight - boundingBox.height())
+
+        let viewBox = new ViewBox(boundingBox);
+
+        return viewBox;
     }
 }
 
@@ -120,9 +144,11 @@ class State {
     }
 
     update() {
+        let inc = 1;
         for (let position of this.positions0) {
-            let dx = Math.floor(Math.random() * 3.5) - 1;
-            let dy = Math.floor(Math.random() * 2.8) - 1;
+            let dx = inc;
+            let dy = inc;
+            inc = -inc;
             position.x += dx;
             position.y += dy;
         }

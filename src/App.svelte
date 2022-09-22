@@ -7,7 +7,7 @@
   let fps = "";
 
   onMount(() => {
-    let frame;
+    let frameCallbackId: number;
 
     const loop = (timestamp) => {
       let elapsed = timestamp - lastLoopTimestamp;
@@ -16,12 +16,12 @@
         fps = (1000 / elapsed).toFixed();
       }
       state.updatePositions();
-      frame = requestAnimationFrame(loop);
+      frameCallbackId = requestAnimationFrame(loop);
     };
 
     loop(0);
 
-    return () => cancelAnimationFrame(frame);
+    return () => cancelAnimationFrame(frameCallbackId);
   });
 </script>
 

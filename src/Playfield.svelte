@@ -1,13 +1,32 @@
 <script>
+    import { onMount } from "svelte";
+
     export let state;
     export let id;
+    let display;
     let width;
     let height;
 
     $: state.updateDisplayDimensions(width, height);
+
+    // bind:clientWidth/Height is unreliable; use ResizeObserver (because I
+    // don't care about old browsers)
+    onMount(() => {
+        width = display.clientWidth;
+        height = display.clientHeight;
+
+        let resizeObserver = new ResizeObserver(() => {
+            width = display.clientWidth;
+            height = display.clientHeight;
+        });
+
+        resizeObserver.observe(display);
+
+        return () => resizeObserver.unobserve(display);
+    });
 </script>
 
-<div {id} bind:clientWidth={width} bind:clientHeight={height}>
+<div {id} bind:this={display}>
     <svg
         viewBox="{$state.viewBox.x} {$state.viewBox.y} {$state.viewBox
             .width} {$state.viewBox.height}"

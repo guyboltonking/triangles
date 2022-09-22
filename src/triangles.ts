@@ -112,12 +112,11 @@ class StateDisplay {
         let requiredWidth = this.width;
         let requiredHeight = this.height;
 
-        let viewToDisplayScalingFactor = this.height / boundingBox.height();
-        if (viewToDisplayScalingFactor < 1) {
-            if (viewToDisplayScalingFactor * boundingBox.width() > this.width) {
-                viewToDisplayScalingFactor = this.width / boundingBox.width();
-            }
+        let viewToDisplayScalingFactor = Math.min(
+            this.height / boundingBox.height(),
+            this.width / boundingBox.width());
 
+        if (viewToDisplayScalingFactor < 1) {
             requiredWidth = this.width / viewToDisplayScalingFactor;
             requiredHeight = this.height / viewToDisplayScalingFactor;
         }
@@ -174,9 +173,9 @@ class State {
 
 let state_ = new State();
 
-state_.addPlayer(1, 2, 10, 10);
+state_.addPlayer(1, 2, -1000, -1000);
 state_.addPlayer(0, 2, 20, 10);
-state_.addPlayer(0, 1, 10, 20);
+//state_.addPlayer(0, 1, 10, 20);
 
 const { subscribe, set, update } = writable(new StateDisplay(state_))
 

@@ -65,20 +65,28 @@ export class BoundingBox {
     }
 }
 
+class PlayerDisplay {
+    following: [PlayerDisplay, PlayerDisplay] = [null, null];
+    position: Position = new Position(0, 0);
+}
+
 class StateDisplay {
     width: number = 0;
     height: number = 0;
     margin: number = 10;
     viewBox: ViewBox = new ViewBox(new BoundingBox(new Position(0, 0)));
     state: State;
+    playerDisplays: PlayerDisplay[];
 
     constructor(state: State) {
         this.state = state;
+        this.updatePlayerDisplays();
     }
 
     updatePositions(): StateDisplay {
         this.state.update();
         this.viewBox = this.calculateViewBox();
+        this.updatePlayerDisplays();
         return this;
     }
 
@@ -88,8 +96,28 @@ class StateDisplay {
         return this;
     }
 
-    positions(): Position[] {
-        return this.state.positions();
+    players(): PlayerDisplay[] {
+        return this.playerDisplays;
+    }
+
+    updatePlayerDisplays() {
+        if (!this.playerDisplays) {
+            this.playerDisplays =
+                new Array<PlayerDisplay>(this.state.players.length);
+            for (let i in this.state.players) {
+                this.playerDisplays[i] = new PlayerDisplay();
+            }
+        }
+
+        this.state.positions().forEach((position, i) => {
+            let playerDisplay = this.playerDisplays[i];
+            playerDisplay.position = position;
+            this.state.players[i].following.forEach((playerId, j) => {
+                playerDisplay.following[j] = playerId == -1 ?
+                    null :
+                    this.playerDisplays[playerId];
+            });
+        });
     }
 
     private calculateViewBox(): ViewBox {
@@ -145,9 +173,11 @@ class State {
     update() {
         let inc = 1;
         for (let position of this.positions0) {
-            let dx = inc;
-            let dy = inc;
-            inc = -inc;
+            // let dx = inc;
+            // let dy = inc;
+            let dx = (Math.random() - 0.5) * 2;
+            let dy = (Math.random() - 0.5) * 2;
+            //inc = -inc;
             position.x += dx;
             position.y += dy;
         }
@@ -173,9 +203,9 @@ class State {
 
 let state_ = new State();
 
-state_.addPlayer(1, 2, -1000, -1000);
+state_.addPlayer(1, 2, 10, 10);
 state_.addPlayer(0, 2, 20, 10);
-//state_.addPlayer(0, 1, 10, 20);
+state_.addPlayer(0, 1, 10, 20);
 
 const { subscribe, set, update } = writable(new StateDisplay(state_))
 

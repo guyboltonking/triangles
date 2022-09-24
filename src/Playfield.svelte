@@ -4,8 +4,8 @@
     export let state;
     export let id;
     let display;
-    let width;
-    let height;
+    let width = 0;
+    let height = 0;
 
     $: state.updateDisplayDimensions(width, height);
 

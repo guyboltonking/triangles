@@ -1,7 +1,6 @@
 import { writable } from "svelte/store";
 
 type PlayerId = number;
-
 class Player {
     following: [PlayerId, PlayerId];
 
@@ -10,31 +9,30 @@ class Player {
     }
 }
 
-export class Position {
-    x: number;
-    y: number;
-
+class XY extends Array<number> {
     constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+        super(2)
+        this[0] = x;
+        this[1] = y;
     }
+
+    get x() { return this[0]; }
+    set x(x_: number) { this[0] = x_; }
+
+    get y() { return this[1]; }
+    set y(y_: number) { this[1] = y_; }
 }
 
-export class ViewBox {
+class Position extends XY { }
+
+export interface ViewBox {
     x: number;
     y: number;
     width: number;
     height: number;
-
-    constructor(boundingBox: BoundingBox) {
-        this.x = boundingBox.origin().x;
-        this.y = boundingBox.origin().y;
-        this.width = boundingBox.width();
-        this.height = boundingBox.height();
-    }
 }
 
-export class BoundingBox {
+class BoundingBox implements ViewBox {
     topLeft: Position = new Position(0, 0);
     bottomRight: Position = new Position(0, 0);
 
@@ -52,15 +50,19 @@ export class BoundingBox {
         this.bottomRight.y = Math.max(this.bottomRight.y, position.y);
     }
 
-    origin(): Position {
-        return this.topLeft;
+    get x(): number {
+        return this.topLeft.x;
     }
 
-    width(): number {
+    get y(): number {
+        return this.topLeft.y;
+    }
+
+    get width(): number {
         return this.bottomRight.x - this.topLeft.x;
     }
 
-    height(): number {
+    get height(): number {
         return this.bottomRight.y - this.topLeft.y;
     }
 }
@@ -74,13 +76,13 @@ class StateDisplay {
     width: number = 0;
     height: number = 0;
     margin: number = 10;
-    viewBox: ViewBox = new ViewBox(new BoundingBox(new Position(0, 0)));
+    viewBox: ViewBox;
     state: State;
     playerDisplays: PlayerDisplay[];
 
     constructor(state: State) {
         this.state = state;
-        this.updatePlayerDisplays();
+        this.updatePositions();
     }
 
     updatePositions(): StateDisplay {
@@ -93,6 +95,7 @@ class StateDisplay {
     updateDisplayDimensions(width: number, height: number): StateDisplay {
         this.width = width;
         this.height = height;
+        this.viewBox = this.calculateViewBox();
         return this;
     }
 
@@ -121,6 +124,10 @@ class StateDisplay {
     }
 
     private calculateViewBox(): ViewBox {
+        if (this.width == 0 || this.height == 0) {
+            return new BoundingBox(new Position(0, 0));
+        }
+
         let boundingBox = this.state.calculateBoundingBox();
 
         boundingBox.expand(
@@ -141,22 +148,20 @@ class StateDisplay {
         let requiredHeight = this.height;
 
         let viewToDisplayScalingFactor = Math.min(
-            this.height / boundingBox.height(),
-            this.width / boundingBox.width());
+            this.height / boundingBox.height,
+            this.width / boundingBox.width);
 
         if (viewToDisplayScalingFactor < 1) {
             requiredWidth = this.width / viewToDisplayScalingFactor;
             requiredHeight = this.height / viewToDisplayScalingFactor;
         }
 
-        boundingBox.topLeft.x -= (requiredWidth - boundingBox.width()) / 2;
-        boundingBox.bottomRight.x += (requiredWidth - boundingBox.width())
-        boundingBox.topLeft.y -= (requiredHeight - boundingBox.height()) / 2;
-        boundingBox.bottomRight.y += (requiredHeight - boundingBox.height())
+        boundingBox.topLeft.x -= (requiredWidth - boundingBox.width) / 2;
+        boundingBox.bottomRight.x += (requiredWidth - boundingBox.width)
+        boundingBox.topLeft.y -= (requiredHeight - boundingBox.height) / 2;
+        boundingBox.bottomRight.y += (requiredHeight - boundingBox.height)
 
-        let viewBox = new ViewBox(boundingBox);
-
-        return viewBox;
+        return boundingBox;
     }
 }
 

@@ -109,7 +109,7 @@ class StateDisplay {
             }
         }
 
-        this.state.positions().forEach((position, i) => {
+        this.state.positions.forEach((position, i) => {
             let playerDisplay = this.playerDisplays[i];
             playerDisplay.position = position;
             this.state.players[i].following.forEach((playerId, j) => {
@@ -162,17 +162,16 @@ class StateDisplay {
 
 class State {
     players: Player[] = [];
-    positions0: Position[] = [];
-    positions1: Position[] = [];
+    positions: Position[] = [];
 
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
         this.players.push(new Player([following0, following1]));
-        this.positions0.push(new Position(x, y));
+        this.positions.push(new Position(x, y));
     }
 
     update() {
         let inc = 1;
-        for (let position of this.positions0) {
+        for (let position of this.positions) {
             // let dx = inc;
             // let dy = inc;
             let dx = (Math.random() - 0.5) * 2;
@@ -183,13 +182,9 @@ class State {
         }
     }
 
-    positions(): Position[] {
-        return this.positions0;
-    }
-
     calculateBoundingBox(): BoundingBox {
         let result: BoundingBox = null;
-        for (let position of this.positions()) {
+        for (let position of this.positions) {
             if (result == null) {
                 result = new BoundingBox(position);
             }

@@ -6,9 +6,10 @@
   let lastLoopTimestamp = 0;
   let fps = "";
 
-  onMount(() => {
-    let frameCallbackId: number;
+  let frameCallbackId: number;
+  let running: boolean;
 
+  function run() {
     const loop = (timestamp) => {
       let elapsed = timestamp - lastLoopTimestamp;
       lastLoopTimestamp = timestamp;
@@ -18,18 +19,37 @@
       state.updatePositions();
       frameCallbackId = requestAnimationFrame(loop);
     };
+    loop(lastLoopTimestamp);
+    running = true;
+  }
 
-    loop(0);
+  function stop() {
+    cancelAnimationFrame(frameCallbackId);
+    running = false;
+  }
 
-    return () => cancelAnimationFrame(frameCallbackId);
+  onMount(() => {
+    state.updatePositions();
+    run();
+    return () => stop();
   });
+
+  let runningOrPaused = "pause";
+
+  function togglePause() {
+    if (running) {
+      stop();
+    } else {
+      run();
+    }
+  }
 </script>
 
 <div id="controls">
-  <p>{fps}</p>
-  <p>{$state.width}</p>
-  <p>{$state.height}</p>
+  <button on:click={togglePause}
+    >{#if running}pause{:else}run{/if}</button
+  >
+  <!-- <p>{fps}</p> -->
 </div>
 
-<!-- TODO: make the viewBox have the same aspect ratio as the svg -->
 <Playfield id="display" {state} />

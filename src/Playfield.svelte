@@ -64,7 +64,7 @@
             {#if player.following[0] && player.following[1]}
                 <polygon
                     points="
-                    {player.target.x},{player.target.y}
+                    {player.targets[0].x},{player.targets[0].y}
                     {player.following[0].position.x},{player.following[0]
                         .position.y}
                     {player.following[1].position.x},{player.following[1]
@@ -74,12 +74,12 @@
                     stroke="#ccc"
                 />
                 <circle
-                    cx={player.target.x}
-                    cy={player.target.y}
+                    cx={player.targets[0].x}
+                    cy={player.targets[0].y}
                     r="2"
                     fill="red"
                 />
-                <text x={player.target.x} y={player.target.y} color="red"
+                <text x={player.targets[0].x} y={player.targets[0].y} fill="red"
                     >{player.id}</text
                 >
             {/if}
@@ -90,8 +90,8 @@
             <line
                 x1={player.position.x}
                 y1={player.position.y}
-                x2={player.target.x}
-                y2={player.target.y}
+                x2={player.targets[0].x}
+                y2={player.targets[0].y}
                 stroke-width="2"
                 stroke="blue"
                 marker-end="url(#arrowhead)"

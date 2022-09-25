@@ -95,7 +95,7 @@ class PlayerDisplay {
     id: number;
     following: [PlayerDisplay, PlayerDisplay] = [null, null];
     position: Position = new Position(0, 0);
-    target: Position = new Position(0, 0);
+    targets: [Position, Position] = [new Position(0, 0), new Position(0, 0)];
 }
 
 class StateDisplay {
@@ -142,7 +142,7 @@ class StateDisplay {
         this.state.positions.forEach((position, playerIndex) => {
             let playerDisplay = this.playerDisplays[playerIndex];
             playerDisplay.position = position;
-            playerDisplay.target = this.state.targets[playerIndex];
+            playerDisplay.targets = this.state.targets[playerIndex];
             this.state.players[playerIndex].following.forEach((playerId, j) => {
                 playerDisplay.following[j] = playerId == NO_PLAYER ?
                     null :
@@ -198,7 +198,7 @@ const SIN60 = Math.sin(Math.PI / 3);
 class State {
     players: Player[] = [];
     positions: Position[] = [];
-    targets: Position[] = [];
+    targets: [Position, Position][] = [];
 
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
         let player = new Player();
@@ -208,7 +208,8 @@ class State {
         this.targets.push(null);
     }
 
-    static calculateTarget(player: Position, a: Position, b: Position): Position {
+    // Return a tuple of [preferred-target, other-target]
+    static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
         let ab = Vector.between(a, b);
         let abMid = ab.multiply(0.5);
 
@@ -219,16 +220,16 @@ class State {
         let target2 = a.add(abMid).add(abPerp.multiply(-1));
 
         return Vector.between(player, target1).distance() <
-            Vector.between(player, target2).distance() ?
-            target1 :
-            target2;
+            Vector.between(player, target2).distance() + 1 ?
+            [target1, target2] :
+            [target2, target1];
     }
 
     calculateNewTargets() {
         this.players.forEach((player, playerIndex) => {
             if (player.following[0] != NO_PLAYER &&
                 player.following[1] != NO_PLAYER) {
-                this.targets[playerIndex] = State.calculateTarget(
+                this.targets[playerIndex] = State.calculateTargets(
                     this.positions[playerIndex],
                     this.positions[player.following[0]],
                     this.positions[player.following[1]]
@@ -243,10 +244,11 @@ class State {
     calculateNewPositions() {
         this.targets.forEach((target, playerIndex) => {
             if (target != null) {
-                if (Vector.between(this.positions[playerIndex], target).distance() > 1) {
+                const targetVector = Vector.between(this.positions[playerIndex], target[0]);
+                if (targetVector.distance() > 1) {
                     this.positions[playerIndex] =
                         this.positions[playerIndex]
-                            .add(Vector.between(this.positions[playerIndex], target).normalize());
+                            .add(targetVector.normalize());
                 }
             }
         });
@@ -268,7 +270,8 @@ class State {
             }
             let target = this.targets[playerIndex];
             if (target != null) {
-                result.expand(target);
+                result.expand(target[0]);
+                result.expand(target[1]);
             }
         });
         return result;
@@ -278,9 +281,9 @@ class State {
 let state_ = new State();
 
 state_.addPlayer(1, 2, 1000, 1000);
-state_.addPlayer(0, 3, 2000, 1000);
-state_.addPlayer(3, 1, 1000, 2000);
-state_.addPlayer(0, 2, 3000, 2000);
+state_.addPlayer(0, 1, 2000, 1000);
+state_.addPlayer(0, 2, 1000, 2000);
+// state_.addPlayer(0, 2, 3000, 2000);
 // state_.addPlayer(3, 2, 1000, 2000);
 // state_.addPlayer(4, 2, 1000, 2000);
 

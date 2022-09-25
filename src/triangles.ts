@@ -20,8 +20,14 @@ class XY extends Array<number> {
 }
 
 class Position extends XY {
+    static CLOSE_ENOUGH: number = 1;
+
     add(v: Vector): Position {
         return new Position(this.x + v.x, this.y + v.y);
+    }
+
+    closeTo(p: Position) {
+        return Vector.between(this, p).distance() < Position.CLOSE_ENOUGH;
     }
 }
 
@@ -96,6 +102,9 @@ class PlayerDisplay {
     following: [PlayerDisplay, PlayerDisplay] = [null, null];
     position: Position = new Position(0, 0);
     targets: [Position, Position] = [new Position(0, 0), new Position(0, 0)];
+    stationary(): boolean {
+        return this.targets == null || this.position.closeTo(this.targets[0]);
+    }
 }
 
 class StateDisplay {
@@ -211,6 +220,11 @@ class State {
     // Return a tuple of [preferred-target, other-target]
     static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
         let ab = Vector.between(a, b);
+
+        if (ab.distance() < Position.CLOSE_ENOUGH) {
+            return [a, a];
+        }
+
         let abMid = ab.multiply(0.5);
 
         let perpDist = ab.distance() * SIN60;
@@ -219,10 +233,15 @@ class State {
         let target1 = a.add(abMid).add(abPerp);
         let target2 = a.add(abMid).add(abPerp.multiply(-1));
 
-        return Vector.between(player, target1).distance() <
-            Vector.between(player, target2).distance() + 1 ?
-            [target1, target2] :
-            [target2, target1];
+        let target1Distance = Vector.between(player, target1).distance();
+        let target2Distance = Vector.between(player, target2).distance();
+
+        // Add a hysteresis zone to stop distances rapidly switching
+        return target1Distance < target2Distance + 1 ?
+            target1Distance < Position.CLOSE_ENOUGH ?
+                [player, target2] : [target1, target2] :
+            target2Distance < Position.CLOSE_ENOUGH ?
+                [player, target1] : [target2, target1];
     }
 
     calculateNewTargets() {
@@ -244,11 +263,13 @@ class State {
     calculateNewPositions() {
         this.targets.forEach((target, playerIndex) => {
             if (target != null) {
-                const targetVector = Vector.between(this.positions[playerIndex], target[0]);
-                if (targetVector.distance() > 1) {
+                const targetVector =
+                    Vector.between(this.positions[playerIndex], target[0]);
+                if (targetVector.distance() > Position.CLOSE_ENOUGH) {
                     this.positions[playerIndex] =
                         this.positions[playerIndex]
                             .add(targetVector.normalize());
+
                 }
             }
         });
@@ -280,10 +301,10 @@ class State {
 
 let state_ = new State();
 
-state_.addPlayer(1, 2, 1000, 1000);
-state_.addPlayer(0, 1, 2000, 1000);
-state_.addPlayer(0, 2, 1000, 2000);
-// state_.addPlayer(0, 2, 3000, 2000);
+state_.addPlayer(1, 2, 100, 100);
+state_.addPlayer(0, 2, 200, 100);
+state_.addPlayer(1, 3, 100, 200);
+state_.addPlayer(0, 2, 300, 200);
 // state_.addPlayer(3, 2, 1000, 2000);
 // state_.addPlayer(4, 2, 1000, 2000);
 

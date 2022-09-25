@@ -48,7 +48,7 @@
                 refY="2"
                 orient="auto"
                 stroke-width="0"
-                fill="blue"
+                fill="red"
             >
                 <polygon points="0 0, 6 2, 0 4" />
             </marker>
@@ -79,6 +79,17 @@
                     r="2"
                     fill="red"
                 />
+                {#if !player.stationary()}
+                    <line
+                        x1={player.position.x}
+                        y1={player.position.y}
+                        x2={player.targets[0].x}
+                        y2={player.targets[0].y}
+                        stroke-width="2"
+                        stroke="red"
+                        marker-end="url(#arrowhead)"
+                    />
+                {/if}
                 <text x={player.targets[0].x} y={player.targets[0].y} fill="red"
                     >{player.id}</text
                 >
@@ -87,15 +98,6 @@
         {#each $state.players() as player}
             <circle cx={player.position.x} cy={player.position.y} r="2" />
             <text x={player.position.x} y={player.position.y}>{player.id}</text>
-            <line
-                x1={player.position.x}
-                y1={player.position.y}
-                x2={player.targets[0].x}
-                y2={player.targets[0].y}
-                stroke-width="2"
-                stroke="blue"
-                marker-end="url(#arrowhead)"
-            />
         {/each}
     </svg>
 </div>

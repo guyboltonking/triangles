@@ -193,7 +193,7 @@ class StateDisplay {
     }
 }
 
-const SIN60 = Math.sin(60);
+const SIN60 = Math.sin(Math.PI / 3);
 
 class State {
     players: Player[] = [];
@@ -259,14 +259,18 @@ class State {
 
     calculateBoundingBox(): BoundingBox {
         let result: BoundingBox = null;
-        for (let position of this.positions) {
+        this.positions.forEach((position, playerIndex) => {
             if (result == null) {
                 result = new BoundingBox(position);
             }
             else {
                 result.expand(position);
             }
-        }
+            let target = this.targets[playerIndex];
+            if (target != null) {
+                result.expand(target);
+            }
+        });
         return result;
     }
 }

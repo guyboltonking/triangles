@@ -20,7 +20,7 @@ class XY extends Array<number> {
 }
 
 class Position extends XY {
-    static CLOSE_ENOUGH: number = 1;
+    static CLOSE_ENOUGH: number = 2;
 
     add(v: Vector): Position {
         return new Position(this.x + v.x, this.y + v.y);
@@ -102,9 +102,14 @@ class PlayerDisplay {
     following: [PlayerDisplay, PlayerDisplay] = [null, null];
     position: Position = new Position(0, 0);
     targets: [Position, Position] = [new Position(0, 0), new Position(0, 0)];
-    stationary(): boolean {
-        return this.targets == null || this.position.closeTo(this.targets[0]);
+    hasTarget(): boolean {
+        return this.targets != null && !this.position.closeTo(this.targets[0]);
     }
+}
+
+export enum ZoomMode {
+    SCREEN,
+    PLAYERS
 }
 
 class StateDisplay {
@@ -112,6 +117,7 @@ class StateDisplay {
     height: number = 0;
     margin: number = 10;
     viewBox: ViewBox;
+    zoomMode: ZoomMode = ZoomMode.SCREEN;
     state: State;
     playerDisplays: PlayerDisplay[];
 
@@ -130,6 +136,12 @@ class StateDisplay {
     updateDisplayDimensions(width: number, height: number): StateDisplay {
         this.width = width;
         this.height = height;
+        this.viewBox = this.calculateViewBox();
+        return this;
+    }
+
+    updateZoomMode(zoomMode: ZoomMode): StateDisplay {
+        this.zoomMode = zoomMode;
         this.viewBox = this.calculateViewBox();
         return this;
     }
@@ -188,7 +200,7 @@ class StateDisplay {
             this.height / boundingBox.height,
             this.width / boundingBox.width);
 
-        if (viewToDisplayScalingFactor < 1) {
+        if (this.zoomMode == ZoomMode.PLAYERS || viewToDisplayScalingFactor < 1) {
             requiredWidth = this.width / viewToDisplayScalingFactor;
             requiredHeight = this.height / viewToDisplayScalingFactor;
         }
@@ -301,12 +313,12 @@ class State {
 
 let state_ = new State();
 
-state_.addPlayer(1, 2, 100, 100);
-state_.addPlayer(0, 2, 200, 100);
-state_.addPlayer(1, 3, 100, 200);
-state_.addPlayer(0, 2, 300, 200);
-// state_.addPlayer(3, 2, 1000, 2000);
-// state_.addPlayer(4, 2, 1000, 2000);
+state_.addPlayer(1, 2, 1000, 1000);
+state_.addPlayer(0, 2, 2000, 1000);
+state_.addPlayer(1, 3, 1000, 2000);
+state_.addPlayer(0, 4, 3000, 2000);
+state_.addPlayer(3, 2, 1000, 2000);
+state_.addPlayer(4, 3, 1000, 2000);
 
 
 const { subscribe, set, update } = writable(new StateDisplay(state_))
@@ -316,5 +328,6 @@ export let state = {
     set,
     updatePositions: () => update(state => state.updatePositions()),
     updateDisplayDimensions: (width: number, height: number) =>
-        update(state => state.updateDisplayDimensions(width, height))
+        update(state => state.updateDisplayDimensions(width, height)),
+    updateZoomMode: (zoomMode: ZoomMode) => update(state => state.updateZoomMode(zoomMode)),
 };

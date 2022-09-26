@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Playfield from "./Playfield.svelte";
-  import { state } from "./triangles.js";
+  import { state, ZoomMode } from "./triangles.js";
 
   let lastLoopTimestamp = 0;
   let fps = "";
@@ -43,12 +43,20 @@
       run();
     }
   }
+
+  let zoomMode = ZoomMode.SCREEN;
+  $: state.updateZoomMode(zoomMode);
 </script>
 
 <div id="controls">
   <button on:click={togglePause}
     >{#if running}pause{:else}run{/if}</button
   >
+  <select bind:value={zoomMode}>
+    <option value={ZoomMode.SCREEN}>Screen</option>
+    <option value={ZoomMode.PLAYERS}>Players</option>
+  </select>
+
   <!-- <p>{fps}</p> -->
 </div>
 

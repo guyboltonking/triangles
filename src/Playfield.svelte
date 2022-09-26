@@ -73,13 +73,13 @@
                     fill="none"
                     stroke="#ccc"
                 />
-                <circle
-                    cx={player.targets[0].x}
-                    cy={player.targets[0].y}
-                    r="2"
-                    fill="red"
-                />
-                {#if !player.stationary()}
+                {#if player.hasTarget()}
+                    <circle
+                        cx={player.targets[0].x}
+                        cy={player.targets[0].y}
+                        r="2"
+                        fill="red"
+                    />
                     <line
                         x1={player.position.x}
                         y1={player.position.y}
@@ -89,10 +89,12 @@
                         stroke="red"
                         marker-end="url(#arrowhead)"
                     />
+                    <text
+                        x={player.targets[0].x}
+                        y={player.targets[0].y}
+                        fill="red">{player.id}</text
+                    >
                 {/if}
-                <text x={player.targets[0].x} y={player.targets[0].y} fill="red"
-                    >{player.id}</text
-                >
             {/if}
         {/each}
         {#each $state.players() as player}

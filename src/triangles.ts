@@ -2,9 +2,12 @@ import { writable } from "svelte/store";
 
 type PlayerId = number;
 const NO_PLAYER: PlayerId = -1;
+
 class Player {
     following: [PlayerId, PlayerId] = [NO_PLAYER, NO_PLAYER];
+    speed: number = 1;
 }
+
 class XY extends Array<number> {
     constructor(x: number, y: number) {
         super(2)
@@ -20,7 +23,7 @@ class XY extends Array<number> {
 }
 
 class Position extends XY {
-    static CLOSE_ENOUGH: number = 2;
+    static CLOSE_ENOUGH: number = 1;
 
     add(v: Vector): Position {
         return new Position(this.x + v.x, this.y + v.y);
@@ -234,7 +237,7 @@ class State {
         let ab = Vector.between(a, b);
 
         if (ab.distance() < Position.CLOSE_ENOUGH) {
-            return [a, a];
+            return [player, player];
         }
 
         let abMid = ab.multiply(0.5);
@@ -275,13 +278,17 @@ class State {
     calculateNewPositions() {
         this.targets.forEach((target, playerIndex) => {
             if (target != null) {
+                const player = this.players[playerIndex];
                 const targetVector =
                     Vector.between(this.positions[playerIndex], target[0]);
-                if (targetVector.distance() > Position.CLOSE_ENOUGH) {
+                if (targetVector.distance() > player.speed) {
                     this.positions[playerIndex] =
                         this.positions[playerIndex]
-                            .add(targetVector.normalize());
+                            .add(targetVector.normalize().multiply(player.speed));
 
+                }
+                else {
+                    this.positions[playerIndex] = target[0];
                 }
             }
         });
@@ -313,12 +320,12 @@ class State {
 
 let state_ = new State();
 
-state_.addPlayer(1, 2, 1000, 1000);
-state_.addPlayer(0, 2, 2000, 1000);
-state_.addPlayer(1, 3, 1000, 2000);
-state_.addPlayer(0, 4, 3000, 2000);
-state_.addPlayer(3, 2, 1000, 2000);
-state_.addPlayer(4, 3, 1000, 2000);
+state_.addPlayer(1, 2, 1000 / 2, 1000 / 2);
+state_.addPlayer(0, 2, 2000 / 2, 1000 / 2);
+state_.addPlayer(1, 3, 1000 / 2, 2000 / 2);
+state_.addPlayer(0, 4, 3000 / 2, 2000 / 2);
+state_.addPlayer(3, 2, 1000 / 2, 2000 / 2);
+state_.addPlayer(4, 3, 1000 / 2, 2000 / 2);
 
 
 const { subscribe, set, update } = writable(new StateDisplay(state_))

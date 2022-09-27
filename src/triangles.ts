@@ -227,17 +227,22 @@ class State {
     static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
         let ab = Vector.between(a, b);
 
+        let target1;
+        let target2;
+
         if (ab.distance() < Position.CLOSE_ENOUGH) {
-            return [a, a];
+            target1 = a;
+            target2 = a;
         }
+        else {
+            let abMid = ab.multiply(0.5);
 
-        let abMid = ab.multiply(0.5);
+            let perpDist = ab.distance() * SIN60;
+            let abPerp = ab.perpendicular().normalize().multiply(perpDist);
 
-        let perpDist = ab.distance() * SIN60;
-        let abPerp = ab.perpendicular().normalize().multiply(perpDist);
-
-        let target1 = a.add(abMid).add(abPerp);
-        let target2 = a.add(abMid).add(abPerp.multiply(-1));
+            target1 = a.add(abMid).add(abPerp);
+            target2 = a.add(abMid).add(abPerp.multiply(-1));
+        }
 
         let target1Distance = Vector.between(player, target1).distance();
         let target2Distance = Vector.between(player, target2).distance();

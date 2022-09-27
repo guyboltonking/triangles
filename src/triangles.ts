@@ -34,7 +34,7 @@ class Position extends XY {
     }
 }
 
-class Vector extends XY {
+export class Vector extends XY {
     static between(a: Position, b: Position) {
         return new Vector(b.x - a.x, b.y - a.y);
     }
@@ -106,7 +106,7 @@ class PlayerDisplay {
     position: Position = new Position(0, 0);
     targets: [Position, Position] = [new Position(0, 0), new Position(0, 0)];
     hasTarget(): boolean {
-        return this.targets != null && !this.position.closeTo(this.targets[0]);
+        return this.targets != null && this.position != this.targets[0];
     }
 }
 
@@ -237,7 +237,7 @@ class State {
         let ab = Vector.between(a, b);
 
         if (ab.distance() < Position.CLOSE_ENOUGH) {
-            return [player, player];
+            return [a, a];
         }
 
         let abMid = ab.multiply(0.5);

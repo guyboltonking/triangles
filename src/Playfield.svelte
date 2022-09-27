@@ -1,11 +1,13 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
+    import { Vector } from "./triangles.js";
 
     export let state;
     export let id;
     let display;
     let width = 0;
     let height = 0;
+    let arrowWidth = 6;
 
     $: state.updateDisplayDimensions(width, height);
 
@@ -42,15 +44,15 @@
             </pattern>
             <marker
                 id="arrowhead"
-                markerWidth="6"
+                markerWidth={arrowWidth}
                 markerHeight="4"
-                refX="6"
+                refX={arrowWidth}
                 refY="2"
                 orient="auto"
                 stroke-width="0"
                 fill="red"
             >
-                <polygon points="0 0, 6 2, 0 4" />
+                <polygon points="0 0, {arrowWidth} 2, 0 4" />
             </marker>
         </defs>
         <rect
@@ -80,15 +82,17 @@
                         r="2"
                         fill="red"
                     />
-                    <line
-                        x1={player.position.x}
-                        y1={player.position.y}
-                        x2={player.targets[0].x}
-                        y2={player.targets[0].y}
-                        stroke-width="2"
-                        stroke="red"
-                        marker-end="url(#arrowhead)"
-                    />
+                    {#if Vector.between(player.position, player.targets[0]).distance() > arrowWidth}
+                        <line
+                            x1={player.position.x}
+                            y1={player.position.y}
+                            x2={player.targets[0].x}
+                            y2={player.targets[0].y}
+                            stroke-width="2"
+                            stroke="red"
+                            marker-end="url(#arrowhead)"
+                        />
+                    {/if}
                     <text
                         x={player.targets[0].x}
                         y={player.targets[0].y}

@@ -6,7 +6,7 @@ const NO_PLAYER: PlayerId = -1;
 class Player {
     id: number;
     private _following: [PlayerId, PlayerId] = [null, null];
-    //position: Position;
+    position: Position;
     //targets: [Position, Position];
     speed: number = 1;
 
@@ -17,14 +17,6 @@ class Player {
 
     isFollowing(): boolean {
         return this._following.every(id => id != NO_PLAYER);
-    }
-
-    get position(): Position {
-        return this.state.positions[this.id];
-    }
-
-    set position(position: Position) {
-        this.state.positions[this.id] = position;
     }
 
     get targets(): [Position, Position] {
@@ -255,15 +247,13 @@ const SIN60 = Math.sin(Math.PI / 3);
 
 class State {
     players: Player[] = [];
-    positions: Position[] = [];
     targets: [Position, Position][] = [];
 
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
         let player = new Player(this, [following0, following1]);
         player.id = this.players.length;
-        // player.position = new Position(x, y);
+        player.position = new Position(x, y);
         this.players.push(player);
-        this.positions.push(new Position(x, y));
         this.targets.push(null);
     }
 

@@ -23,8 +23,16 @@ class Player {
         return this.state.positions[this.id];
     }
 
+    set position(position: Position) {
+        this.state.positions[this.id] = position;
+    }
+
     get targets(): [Position, Position] {
         return this.state.targets[this.id];
+    }
+
+    set targets(targets: [Position, Position]) {
+        this.state.targets[this.id] = targets;
     }
 
     private state: State;
@@ -193,7 +201,7 @@ class StateDisplay {
         this.state.positions.forEach((position, playerIndex) => {
             let playerDisplay = this.playerDisplays[playerIndex];
             playerDisplay.position = position;
-            playerDisplay.targets = this.state.targets[playerIndex];
+            playerDisplay.targets = this.state.players[playerIndex].targets;
             this.state.players[playerIndex].following.forEach((player, j) => {
                 playerDisplay.following[j] = player != null ?
                     this.playerDisplays[player.id] : null;
@@ -253,13 +261,11 @@ class State {
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
         let player = new Player(this, [following0, following1]);
         player.id = this.players.length;
-        //player.position = new Position(x, y);
+        // player.position = new Position(x, y);
         this.players.push(player);
         this.positions.push(new Position(x, y));
         this.targets.push(null);
     }
-
-
 
     // Return a tuple of [preferred-target, other-target]
     static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
@@ -289,37 +295,37 @@ class State {
     }
 
     calculateNewTargets() {
-        this.players.forEach((player, playerIndex) => {
+        for (const player of this.players) {
             if (player.isFollowing()) {
-                this.targets[playerIndex] = State.calculateTargets(
+                player.targets = State.calculateTargets(
                     player.position,
                     player.following[0].position,
                     player.following[1].position,
                 );
             }
             else {
-                this.targets[playerIndex] = null;
+                player.targets = null;
             }
-        });
+        }
     }
 
     calculateNewPositions() {
-        this.targets.forEach((target, playerIndex) => {
+        for (const player of this.players) {
+            const target = player.targets;
             if (target != null) {
-                const player = this.players[playerIndex];
                 const targetVector =
-                    Vector.between(this.positions[playerIndex], target[0]);
+                    Vector.between(player.position, target[0]);
                 if (targetVector.distance() > player.speed) {
-                    this.positions[playerIndex] =
-                        this.positions[playerIndex]
+                    player.position =
+                        player.position
                             .add(targetVector.normalize().multiply(player.speed));
 
                 }
                 else {
-                    this.positions[playerIndex] = target[0];
+                    player.position = target[0];
                 }
             }
-        });
+        }
     }
 
     update() {
@@ -329,19 +335,18 @@ class State {
 
     calculateBoundingBox(): BoundingBox {
         let result: BoundingBox = null;
-        this.positions.forEach((position, playerIndex) => {
+        for (const player of this.players) {
             if (result == null) {
-                result = new BoundingBox(position);
+                result = new BoundingBox(player.position);
             }
             else {
-                result.expand(position);
+                result.expand(player.position);
             }
-            let target = this.targets[playerIndex];
-            if (target != null) {
-                result.expand(target[0]);
-                result.expand(target[1]);
+            if (player.targets != null) {
+                result.expand(player.targets[0]);
+                result.expand(player.targets[1]);
             }
-        });
+        }
         return result;
     }
 }

@@ -7,7 +7,7 @@ class Player {
     id: number;
     private _following: [PlayerId, PlayerId] = [null, null];
     position: Position;
-    targets: [Position, Position] = null;
+    target: Position = null;
     speed: number = 1;
 
     get following(): [Player, Player] {
@@ -20,7 +20,7 @@ class Player {
     }
 
     isMoving(): boolean {
-        return this.targets != null && this.position != this.targets[0];
+        return this.target != null && this.position != this.target;
     }
 
     private state: State;
@@ -259,20 +259,19 @@ class State {
                     player.following[1].position,
                 );
                 targets.forEach(target => this.boundingBox.expand(target));
-                player.targets = targets;
+                player.target = targets[0];
             }
             else {
-                player.targets = null;
+                player.target = null;
             }
         }
     }
 
     calculateNewPositions() {
         for (const player of this.players) {
-            const target = player.targets;
-            if (target != null) {
+            if (player.target != null) {
                 const targetVector =
-                    Vector.between(player.position, target[0]);
+                    Vector.between(player.position, player.target);
                 if (targetVector.distance() > player.speed) {
                     player.position =
                         player.position
@@ -280,7 +279,7 @@ class State {
 
                 }
                 else {
-                    player.position = target[0];
+                    player.position = player.target;
                 }
             }
             this.boundingBox.expand(player.position);

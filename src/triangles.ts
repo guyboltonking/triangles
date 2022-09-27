@@ -48,6 +48,10 @@ class XY extends Array<number> {
 class Position extends XY {
     static CLOSE_ENOUGH: number = 1;
 
+    static copy(position: Position): Position {
+        return new Position(position.x, position.y);
+    }
+
     add(v: Vector): Position {
         return new Position(this.x + v.x, this.y + v.y);
     }
@@ -89,21 +93,21 @@ export interface ViewBox {
 }
 
 class BoundingBox implements ViewBox {
-    topLeft: Position = new Position(0, 0);
-    bottomRight: Position = new Position(0, 0);
+    topLeft: Position = null;
+    bottomRight: Position = null;
 
-    constructor(position: Position) {
-        this.topLeft.x = position.x;
-        this.topLeft.y = position.y;
-        this.bottomRight.x = position.x;
-        this.bottomRight.y = position.y;
-    }
-
-    expand(position: Position) {
-        this.topLeft.x = Math.min(this.topLeft.x, position.x);
-        this.topLeft.y = Math.min(this.topLeft.y, position.y);
-        this.bottomRight.x = Math.max(this.bottomRight.x, position.x);
-        this.bottomRight.y = Math.max(this.bottomRight.y, position.y);
+    expand(position: Position): BoundingBox {
+        if (this.topLeft == null) {
+            this.topLeft = Position.copy(position);
+            this.bottomRight = Position.copy(position);
+        }
+        else {
+            this.topLeft.x = Math.min(this.topLeft.x, position.x);
+            this.topLeft.y = Math.min(this.topLeft.y, position.y);
+            this.bottomRight.x = Math.max(this.bottomRight.x, position.x);
+            this.bottomRight.y = Math.max(this.bottomRight.y, position.y);
+        }
+        return this;
     }
 
     get x(): number {
@@ -166,10 +170,10 @@ class StateDisplay {
 
     private calculateViewBox(): ViewBox {
         if (this.width == 0 || this.height == 0) {
-            return new BoundingBox(new Position(0, 0));
+            return new BoundingBox().expand(new Position(0, 0));
         }
 
-        let boundingBox = this.state.calculateBoundingBox();
+        let boundingBox = this.state.boundingBox;
 
         boundingBox.expand(
             new Position(
@@ -210,6 +214,7 @@ const SIN60 = Math.sin(Math.PI / 3);
 
 class State {
     players: Player[] = [];
+    boundingBox: BoundingBox;
 
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
         let player = new Player(this, [following0, following1]);
@@ -248,11 +253,13 @@ class State {
     calculateNewTargets() {
         for (const player of this.players) {
             if (player.isFollowing()) {
-                player.targets = State.calculateTargets(
+                const targets = State.calculateTargets(
                     player.position,
                     player.following[0].position,
                     player.following[1].position,
                 );
+                targets.forEach(target => this.boundingBox.expand(target));
+                player.targets = targets;
             }
             else {
                 player.targets = null;
@@ -276,29 +283,14 @@ class State {
                     player.position = target[0];
                 }
             }
+            this.boundingBox.expand(player.position);
         }
     }
 
     update() {
+        this.boundingBox = new BoundingBox();
         this.calculateNewTargets();
         this.calculateNewPositions();
-    }
-
-    calculateBoundingBox(): BoundingBox {
-        let result: BoundingBox = null;
-        for (const player of this.players) {
-            if (result == null) {
-                result = new BoundingBox(player.position);
-            }
-            else {
-                result.expand(player.position);
-            }
-            if (player.targets != null) {
-                result.expand(player.targets[0]);
-                result.expand(player.targets[1]);
-            }
-        }
-        return result;
     }
 }
 

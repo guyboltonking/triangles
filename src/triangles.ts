@@ -164,8 +164,12 @@ class StateDisplay {
         return this;
     }
 
-    players(): Player[] {
+    get players(): Player[] {
         return this.state.players;
+    }
+
+    finished(): boolean {
+        return this.state.players.every(player => !player.isMoving());
     }
 
     private calculateViewBox(): ViewBox {

@@ -62,7 +62,7 @@
             height={$state.viewBox.height}
             fill="url(#grid)"
         />
-        {#each $state.players() as player}
+        {#each $state.players as player}
             {#if player.following[0] && player.following[1]}
                 <polygon
                     points="
@@ -99,7 +99,7 @@
                 {/if}
             {/if}
         {/each}
-        {#each $state.players() as player}
+        {#each $state.players as player}
             <circle cx={player.position.x} cy={player.position.y} r="2" />
             <text x={player.position.x} y={player.position.y}>{player.id}</text>
         {/each}

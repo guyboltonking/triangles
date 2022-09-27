@@ -7,7 +7,7 @@
   let fps = "";
 
   let frameCallbackId: number;
-  let running: boolean;
+  let running: boolean = true;
 
   function run() {
     const loop = (timestamp) => {
@@ -41,6 +41,12 @@
       stop();
     } else {
       run();
+    }
+  }
+
+  $: {
+    if (running && $state.finished()) {
+      togglePause();
     }
   }
 

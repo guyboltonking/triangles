@@ -198,15 +198,15 @@ class StateDisplay {
             }
         }
 
-        this.state.positions.forEach((position, playerIndex) => {
-            let playerDisplay = this.playerDisplays[playerIndex];
-            playerDisplay.position = position;
-            playerDisplay.targets = this.state.players[playerIndex].targets;
-            this.state.players[playerIndex].following.forEach((player, j) => {
+        for (const player of this.state.players) {
+            let playerDisplay = this.playerDisplays[player.id];
+            playerDisplay.position = player.position;
+            playerDisplay.targets = player.targets;
+            player.following.forEach((player, j) => {
                 playerDisplay.following[j] = player != null ?
                     this.playerDisplays[player.id] : null;
             });
-        });
+        }
     }
 
     private calculateViewBox(): ViewBox {

@@ -48,8 +48,8 @@ class XY extends Array<number> {
 class Position extends XY {
     static CLOSE_ENOUGH: number = 1;
 
-    static copy(position: Position): Position {
-        return new Position(position.x, position.y);
+    clone(): Position {
+        return new Position(this.x, this.y);
     }
 
     add(v: Vector): Position {
@@ -96,10 +96,17 @@ class BoundingBox implements ViewBox {
     topLeft: Position = null;
     bottomRight: Position = null;
 
+    clone(): BoundingBox {
+        const result = new BoundingBox();
+        result.topLeft = this.topLeft.clone();
+        result.bottomRight = this.bottomRight.clone();
+        return result;
+    }
+
     expand(position: Position): BoundingBox {
         if (this.topLeft == null) {
-            this.topLeft = Position.copy(position);
-            this.bottomRight = Position.copy(position);
+            this.topLeft = position.clone();
+            this.bottomRight = position.clone();
         }
         else {
             this.topLeft.x = Math.min(this.topLeft.x, position.x);
@@ -177,7 +184,7 @@ class StateDisplay {
             return new BoundingBox().expand(new Position(0, 0));
         }
 
-        let boundingBox = this.state.boundingBox;
+        let boundingBox = this.state.boundingBox.clone();
 
         boundingBox.expand(
             new Position(

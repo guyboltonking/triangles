@@ -19,6 +19,10 @@ class Player {
         return this._following.every(id => id != NO_PLAYER);
     }
 
+    isMoving(): boolean {
+        return this.targets != null && this.position != this.targets[0];
+    }
+
     private state: State;
 
     constructor(state: State, following: [PlayerId, PlayerId]) {
@@ -119,16 +123,6 @@ class BoundingBox implements ViewBox {
     }
 }
 
-class PlayerDisplay {
-    id: number;
-    following: [PlayerDisplay, PlayerDisplay] = [null, null];
-    position: Position = new Position(0, 0);
-    targets: [Position, Position] = [new Position(0, 0), new Position(0, 0)];
-    moving(): boolean {
-        return this.targets != null && this.position != this.targets[0];
-    }
-}
-
 export enum ZoomMode {
     SCREEN,
     PLAYERS
@@ -141,7 +135,6 @@ class StateDisplay {
     viewBox: ViewBox;
     zoomMode: ZoomMode = ZoomMode.SCREEN;
     state: State;
-    playerDisplays: PlayerDisplay[];
 
     constructor(state: State) {
         this.state = state;
@@ -151,7 +144,6 @@ class StateDisplay {
     updatePositions(): StateDisplay {
         this.state.update();
         this.viewBox = this.calculateViewBox();
-        this.updatePlayerDisplays();
         return this;
     }
 
@@ -168,29 +160,8 @@ class StateDisplay {
         return this;
     }
 
-    players(): PlayerDisplay[] {
-        return this.playerDisplays;
-    }
-
-    updatePlayerDisplays() {
-        if (!this.playerDisplays) {
-            this.playerDisplays =
-                new Array<PlayerDisplay>(this.state.players.length);
-            for (let i in this.state.players) {
-                this.playerDisplays[i] = new PlayerDisplay();
-                this.playerDisplays[i].id = i;
-            }
-        }
-
-        for (const player of this.state.players) {
-            let playerDisplay = this.playerDisplays[player.id];
-            playerDisplay.position = player.position;
-            playerDisplay.targets = player.targets;
-            player.following.forEach((player, j) => {
-                playerDisplay.following[j] = player != null ?
-                    this.playerDisplays[player.id] : null;
-            });
-        }
+    players(): Player[] {
+        return this.state.players;
     }
 
     private calculateViewBox(): ViewBox {

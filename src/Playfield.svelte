@@ -75,7 +75,7 @@
                     fill="none"
                     stroke="#ccc"
                 />
-                {#if player.hasTarget()}
+                {#if player.moving()}
                     <circle
                         cx={player.targets[0].x}
                         cy={player.targets[0].y}

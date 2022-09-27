@@ -4,8 +4,35 @@ type PlayerId = number;
 const NO_PLAYER: PlayerId = -1;
 
 class Player {
-    following: [PlayerId, PlayerId] = [NO_PLAYER, NO_PLAYER];
+    id: number;
+    private _following: [PlayerId, PlayerId] = [null, null];
+    //position: Position;
+    //targets: [Position, Position];
     speed: number = 1;
+
+    get following(): [Player, Player] {
+        return this._following.map(id =>
+            id != NO_PLAYER ? this.state.players[id] : null) as [Player, Player];
+    }
+
+    isFollowing(): boolean {
+        return this._following.every(id => id != NO_PLAYER);
+    }
+
+    get position(): Position {
+        return this.state.positions[this.id];
+    }
+
+    get targets(): [Position, Position] {
+        return this.state.targets[this.id];
+    }
+
+    private state: State;
+
+    constructor(state: State, following: [PlayerId, PlayerId]) {
+        this.state = state;
+        this._following = following;
+    }
 }
 
 class XY extends Array<number> {
@@ -105,7 +132,7 @@ class PlayerDisplay {
     following: [PlayerDisplay, PlayerDisplay] = [null, null];
     position: Position = new Position(0, 0);
     targets: [Position, Position] = [new Position(0, 0), new Position(0, 0)];
-    hasTarget(): boolean {
+    moving(): boolean {
         return this.targets != null && this.position != this.targets[0];
     }
 }
@@ -167,10 +194,9 @@ class StateDisplay {
             let playerDisplay = this.playerDisplays[playerIndex];
             playerDisplay.position = position;
             playerDisplay.targets = this.state.targets[playerIndex];
-            this.state.players[playerIndex].following.forEach((playerId, j) => {
-                playerDisplay.following[j] = playerId == NO_PLAYER ?
-                    null :
-                    this.playerDisplays[playerId];
+            this.state.players[playerIndex].following.forEach((player, j) => {
+                playerDisplay.following[j] = player != null ?
+                    this.playerDisplays[player.id] : null;
             });
         });
     }
@@ -225,12 +251,15 @@ class State {
     targets: [Position, Position][] = [];
 
     addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
-        let player = new Player();
-        player.following = [following0, following1];
+        let player = new Player(this, [following0, following1]);
+        player.id = this.players.length;
+        //player.position = new Position(x, y);
         this.players.push(player);
         this.positions.push(new Position(x, y));
         this.targets.push(null);
     }
+
+
 
     // Return a tuple of [preferred-target, other-target]
     static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
@@ -261,12 +290,11 @@ class State {
 
     calculateNewTargets() {
         this.players.forEach((player, playerIndex) => {
-            if (player.following[0] != NO_PLAYER &&
-                player.following[1] != NO_PLAYER) {
+            if (player.isFollowing()) {
                 this.targets[playerIndex] = State.calculateTargets(
-                    this.positions[playerIndex],
-                    this.positions[player.following[0]],
-                    this.positions[player.following[1]]
+                    player.position,
+                    player.following[0].position,
+                    player.following[1].position,
                 );
             }
             else {

@@ -45,6 +45,14 @@ class XY extends Array<number> {
     set y(y_: number) { this[1] = y_; }
 }
 
+class Dimensions extends XY {
+    get width() { return this.x; }
+    set width(width: number) { this.x = width; }
+
+    get height() { return this.y; }
+    set height(height: number) { this.y = height; }
+}
+
 class Position extends XY {
     static CLOSE_ENOUGH: number = 1;
 
@@ -140,8 +148,7 @@ export enum ZoomMode {
 }
 
 class StateDisplay {
-    width: number = 0;
-    height: number = 0;
+    dimensions: Dimensions = new Dimensions(0, 0);
     margin: number = 10;
     viewBox: ViewBox;
     zoomMode: ZoomMode = ZoomMode.SCREEN;
@@ -159,8 +166,8 @@ class StateDisplay {
     }
 
     updateDisplayDimensions(width: number, height: number): StateDisplay {
-        this.width = width;
-        this.height = height;
+        this.dimensions.height = height;
+        this.dimensions.width = width;
         this.viewBox = this.calculateViewBox();
         return this;
     }
@@ -180,7 +187,7 @@ class StateDisplay {
     }
 
     private calculateViewBox(): ViewBox {
-        if (this.width == 0 || this.height == 0) {
+        if (this.dimensions.width == 0 || this.dimensions.height == 0) {
             return new BoundingBox().expand(new Position(0, 0));
         }
 
@@ -200,16 +207,16 @@ class StateDisplay {
 
         // Calculate the scaling factor we need to multiple the view by to get
         // display.
-        let requiredWidth = this.width;
-        let requiredHeight = this.height;
+        let requiredWidth = this.dimensions.x;
+        let requiredHeight = this.dimensions.y;
 
         let viewToDisplayScalingFactor = Math.min(
-            this.height / boundingBox.height,
-            this.width / boundingBox.width);
+            this.dimensions.height / boundingBox.height,
+            this.dimensions.width / boundingBox.width);
 
         if (this.zoomMode == ZoomMode.PLAYERS || viewToDisplayScalingFactor < 1) {
-            requiredWidth = this.width / viewToDisplayScalingFactor;
-            requiredHeight = this.height / viewToDisplayScalingFactor;
+            requiredWidth = this.dimensions.width / viewToDisplayScalingFactor;
+            requiredHeight = this.dimensions.height / viewToDisplayScalingFactor;
         }
 
         boundingBox.topLeft.x -= (requiredWidth - boundingBox.width) / 2;

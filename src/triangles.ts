@@ -3,7 +3,7 @@ import { derived, readable, writable, type Readable, type Subscriber, type Writa
 type PlayerId = number;
 const NO_PLAYER: PlayerId = -1;
 
-class Player {
+export class Player {
     id: number;
     private _following: [PlayerId, PlayerId] = [null, null];
     position: Position;

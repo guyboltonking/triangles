@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Dimensions, StateDisplay, Vector } from "./triangles.js";
+    import SvgPlayer from "./SvgPlayer.svelte";
+    import { Dimensions, StateDisplay } from "./triangles.js";
 
     export let state: StateDisplay;
     export let id: string;
@@ -12,7 +13,6 @@
     ];
 
     let display;
-    let arrowWidth = 6;
 
     // bind:clientWidth/Height is unreliable; use ResizeObserver (because I
     // don't care about old browsers)
@@ -41,18 +41,7 @@
             >
                 <polyline points="0,100 0,0, 100,0" stroke="red" fill="none" />
             </pattern>
-            <marker
-                id="arrowhead"
-                markerWidth={arrowWidth}
-                markerHeight="4"
-                refX={arrowWidth}
-                refY="2"
-                orient="auto"
-                stroke-width="0"
-                fill="red"
-            >
-                <polygon points="0 0, {arrowWidth} 2, 0 4" />
-            </marker>
+            <SvgPlayer displayMode="defs" />
         </defs>
         <rect
             x={$viewBox.x}
@@ -62,45 +51,10 @@
             fill="url(#grid)"
         />
         {#each $players as player}
-            {#if player.isFollowing()}
-                <polygon
-                    points="
-                    {player.target.x},{player.target.y}
-                    {player.following[0].position.x},{player.following[0]
-                        .position.y}
-                    {player.following[1].position.x},{player.following[1]
-                        .position.y}"
-                    stroke-width="2"
-                    fill="none"
-                    stroke="#ccc"
-                />
-                {#if player.isMoving()}
-                    <circle
-                        cx={player.target.x}
-                        cy={player.target.y}
-                        r="2"
-                        fill="red"
-                    />
-                    {#if Vector.between(player.position, player.target).distance() > arrowWidth}
-                        <line
-                            x1={player.position.x}
-                            y1={player.position.y}
-                            x2={player.target.x}
-                            y2={player.target.y}
-                            stroke-width="2"
-                            stroke="red"
-                            marker-end="url(#arrowhead)"
-                        />
-                    {/if}
-                    <text x={player.target.x} y={player.target.y} fill="red"
-                        >{player.id}</text
-                    >
-                {/if}
-            {/if}
+            <SvgPlayer displayMode="targets" {player} />
         {/each}
         {#each $players as player}
-            <circle cx={player.position.x} cy={player.position.y} r="2" />
-            <text x={player.position.x} y={player.position.y}>{player.id}</text>
+            <SvgPlayer displayMode="player" {player} />
         {/each}
     </svg>
 </div>

@@ -1,3 +1,5 @@
+<svelte:options namespace="svg" />
+
 <script lang="ts">
     import { Player, Vector } from "./triangles.js";
 

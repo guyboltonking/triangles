@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { derived, readable, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
 
 type PlayerId = number;
 const NO_PLAYER: PlayerId = -1;
@@ -45,7 +45,7 @@ class XY extends Array<number> {
     set y(y_: number) { this[1] = y_; }
 }
 
-class Dimensions extends XY {
+export class Dimensions extends XY {
     get width() { return this.x; }
     set width(width: number) { this.x = width; }
 
@@ -147,76 +147,80 @@ export enum ZoomMode {
     PLAYERS
 }
 
-class StateDisplay {
-    dimensions: Dimensions = new Dimensions(0, 0);
-    margin: number = 10;
-    viewBox: ViewBox;
-    zoomMode: ZoomMode = ZoomMode.SCREEN;
-    state: State;
+export class StateDisplay {
+    dimensions: Writable<Dimensions> = writable(new Dimensions(0, 0));
+
+    private updatePlayers: Subscriber<Player[]> = () => { };
+    players: Readable<Player[]> = readable(null, set => {
+        this.updatePlayers = set;
+        this.updatePlayers(this.state.players);
+
+        return () => this.updatePlayers = () => { };
+
+    });
+
+    margin: Writable<number> = writable(10);
+
+    zoomMode: Writable<ZoomMode> = writable(ZoomMode.SCREEN);
+
+    viewBox: Readable<ViewBox> = derived([
+        this.dimensions, this.players, this.margin, this.zoomMode
+    ], ([dimensions, _, margin, zoomMode]) =>
+        StateDisplay.calculateViewBox(dimensions, margin, zoomMode, this.state.boundingBox));
+
+
+    private state: State;
 
     constructor(state: State) {
         this.state = state;
-        this.updatePositions();
+        this.state.update();
     }
 
     updatePositions(): StateDisplay {
         this.state.update();
-        this.viewBox = this.calculateViewBox();
+        this.updatePlayers(this.state.players);
         return this;
     }
 
-    updateDisplayDimensions(width: number, height: number): StateDisplay {
-        this.dimensions.height = height;
-        this.dimensions.width = width;
-        this.viewBox = this.calculateViewBox();
-        return this;
-    }
+    finished: Readable<boolean> = derived(this.players, players =>
+        players.every(player => !player.isMoving()));
 
-    updateZoomMode(zoomMode: ZoomMode): StateDisplay {
-        this.zoomMode = zoomMode;
-        this.viewBox = this.calculateViewBox();
-        return this;
-    }
-
-    get players(): Player[] {
-        return this.state.players;
-    }
-
-    finished(): boolean {
-        return this.state.players.every(player => !player.isMoving());
-    }
-
-    private calculateViewBox(): ViewBox {
-        if (this.dimensions.width == 0 || this.dimensions.height == 0) {
+    private static calculateViewBox(
+        dimensions: Dimensions,
+        margin: number,
+        zoomMode: ZoomMode,
+        boundingBox: BoundingBox
+    ): ViewBox {
+        if (dimensions.width == 0 || dimensions.height == 0) {
             return new BoundingBox().expand(new Position(0, 0));
         }
 
-        let boundingBox = this.state.boundingBox.clone();
+        boundingBox = boundingBox.clone();
 
         boundingBox.expand(
             new Position(
-                boundingBox.topLeft.x - this.margin,
-                boundingBox.topLeft.y - this.margin));
+                boundingBox.topLeft.x - margin,
+                boundingBox.topLeft.y - margin));
 
         boundingBox.expand(
             new Position(
-                boundingBox.bottomRight.x + this.margin,
-                boundingBox.bottomRight.y + this.margin));
+                boundingBox.bottomRight.x + margin,
+                boundingBox.bottomRight.y + margin));
 
         // Pad the BB to the same aspect ratio as the display
 
         // Calculate the scaling factor we need to multiple the view by to get
         // display.
-        let requiredWidth = this.dimensions.x;
-        let requiredHeight = this.dimensions.y;
+        let requiredWidth = dimensions.x;
+        let requiredHeight = dimensions.y;
 
         let viewToDisplayScalingFactor = Math.min(
-            this.dimensions.height / boundingBox.height,
-            this.dimensions.width / boundingBox.width);
+            dimensions.height / boundingBox.height,
+            dimensions.width / boundingBox.width);
 
-        if (this.zoomMode == ZoomMode.PLAYERS || viewToDisplayScalingFactor < 1) {
-            requiredWidth = this.dimensions.width / viewToDisplayScalingFactor;
-            requiredHeight = this.dimensions.height / viewToDisplayScalingFactor;
+        if (zoomMode == ZoomMode.PLAYERS || viewToDisplayScalingFactor < 1) {
+            requiredWidth = dimensions.width / viewToDisplayScalingFactor;
+            requiredHeight = dimensions.height / viewToDisplayScalingFactor;
         }
 
         boundingBox.topLeft.x -= (requiredWidth - boundingBox.width) / 2;
@@ -326,13 +330,4 @@ state_.addPlayer(3, 2, 1000 / 2, 2000 / 2);
 state_.addPlayer(4, 3, 1000 / 2, 2000 / 2);
 
 
-const { subscribe, set, update } = writable(new StateDisplay(state_))
-
-export let state = {
-    subscribe,
-    set,
-    updatePositions: () => update(state => state.updatePositions()),
-    updateDisplayDimensions: (width: number, height: number) =>
-        update(state => state.updateDisplayDimensions(width, height)),
-    updateZoomMode: (zoomMode: ZoomMode) => update(state => state.updateZoomMode(zoomMode)),
-};
+export const state = new StateDisplay(state_);

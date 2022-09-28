@@ -4,10 +4,12 @@
   import { state, ZoomMode } from "./triangles.js";
 
   let lastLoopTimestamp = 0;
-  let fps = "";
+  let fps = "0";
 
   let frameCallbackId: number;
   let running: boolean = true;
+
+  const [finished, zoomMode] = [state.finished, state.zoomMode];
 
   function run() {
     const loop = (timestamp) => {
@@ -34,8 +36,6 @@
     return () => stop();
   });
 
-  let runningOrPaused = "pause";
-
   function togglePause() {
     if (running) {
       stop();
@@ -45,23 +45,22 @@
   }
 
   $: {
-    if (running && $state.finished()) {
+    if (running && $finished) {
       togglePause();
     }
   }
-
-  let zoomMode = ZoomMode.SCREEN;
-  $: state.updateZoomMode(zoomMode);
 </script>
 
 <div id="controls">
-  <button on:click={togglePause}
-    >{#if running}pause{:else}run{/if}</button
-  >
-  <select bind:value={zoomMode}>
+  <button on:click={togglePause}>
+    {#if running}pause{:else}run{/if}
+  </button>
+  Zoom:
+  <select bind:value={$zoomMode}>
     <option value={ZoomMode.SCREEN}>Screen</option>
     <option value={ZoomMode.PLAYERS}>Players</option>
   </select>
+  {#if running}FPS: {fps}{/if}
 
   <!-- <p>{fps}</p> -->
 </div>

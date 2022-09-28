@@ -1,25 +1,27 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Vector } from "./triangles.js";
+    import { Dimensions, StateDisplay, Vector } from "./triangles.js";
 
-    export let state;
-    export let id;
+    export let state: StateDisplay;
+    export let id: string;
+
+    const [dimensions, viewBox, players] = [
+        state.dimensions,
+        state.viewBox,
+        state.players,
+    ];
+
     let display;
-    let width = 0;
-    let height = 0;
     let arrowWidth = 6;
-
-    $: state.updateDisplayDimensions(width, height);
 
     // bind:clientWidth/Height is unreliable; use ResizeObserver (because I
     // don't care about old browsers)
     onMount(() => {
-        width = display.clientWidth;
-        height = display.clientHeight;
-
         let resizeObserver = new ResizeObserver(() => {
-            width = display.clientWidth;
-            height = display.clientHeight;
+            $dimensions = new Dimensions(
+                display.clientWidth,
+                display.clientHeight
+            );
         });
 
         resizeObserver.observe(display);
@@ -29,10 +31,7 @@
 </script>
 
 <div {id} bind:this={display}>
-    <svg
-        viewBox="{$state.viewBox.x} {$state.viewBox.y} {$state.viewBox
-            .width} {$state.viewBox.height}"
-    >
+    <svg viewBox="{$viewBox.x} {$viewBox.y} {$viewBox.width} {$viewBox.height}">
         <defs>
             <pattern
                 id="grid"
@@ -56,13 +55,13 @@
             </marker>
         </defs>
         <rect
-            x={$state.viewBox.x}
-            y={$state.viewBox.y}
-            width={$state.viewBox.width}
-            height={$state.viewBox.height}
+            x={$viewBox.x}
+            y={$viewBox.y}
+            width={$viewBox.width}
+            height={$viewBox.height}
             fill="url(#grid)"
         />
-        {#each $state.players as player}
+        {#each $players as player}
             {#if player.following[0] && player.following[1]}
                 <polygon
                     points="
@@ -99,7 +98,7 @@
                 {/if}
             {/if}
         {/each}
-        {#each $state.players as player}
+        {#each $players as player}
             <circle cx={player.position.x} cy={player.position.y} r="2" />
             <text x={player.position.x} y={player.position.y}>{player.id}</text>
         {/each}

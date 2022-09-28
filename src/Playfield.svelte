@@ -62,7 +62,7 @@
             fill="url(#grid)"
         />
         {#each $players as player}
-            {#if player.following[0] && player.following[1]}
+            {#if player.isFollowing()}
                 <polygon
                     points="
                     {player.target.x},{player.target.y}

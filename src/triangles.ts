@@ -246,7 +246,7 @@ class State {
     }
 
     // Return a tuple of [preferred-target, other-target]
-    static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
+    private static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
         let ab = Vector.between(a, b);
 
         let target1;
@@ -277,7 +277,7 @@ class State {
                 [player, target1] : [target2, target1];
     }
 
-    calculateNewTargets() {
+    private calculateNewTargets() {
         for (const player of this.players) {
             if (player.isFollowing()) {
                 const targets = State.calculateTargets(
@@ -294,7 +294,7 @@ class State {
         }
     }
 
-    calculateNewPositions() {
+    private calculateNewPositions() {
         for (const player of this.players) {
             if (player.target != null) {
                 const targetVector =

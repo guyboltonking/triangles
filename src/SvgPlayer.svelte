@@ -61,3 +61,9 @@
     <circle cx={$player.position.x} cy={$player.position.y} r="2" />
     <text x={$player.position.x} y={$player.position.y}>{$player.id}</text>
 {/if}
+
+<style>
+    text {
+        cursor: default;
+    }
+</style>

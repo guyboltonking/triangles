@@ -12,6 +12,9 @@
         state.players,
     ];
 
+    let zoom: number;
+    $: zoom = $viewBox.zoom;
+
     let display;
 
     // bind:clientWidth/Height is unreliable; use ResizeObserver (because I
@@ -61,7 +64,7 @@
             <SvgPlayer displayMode="selection" {player} />
         {/each}
         {#each $players as player}
-            <SvgPlayer displayMode="player" {player} />
+            <SvgPlayer displayMode="player" {player} {zoom} />
         {/each}
     </svg>
 </div>

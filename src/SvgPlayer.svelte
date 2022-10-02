@@ -10,6 +10,8 @@
     let selected: Writable<boolean> = writable(false);
 
     export let displayMode: string;
+    export let zoom: number = 1;
+
     if (player != null) {
         selected = $player.selected;
     }
@@ -101,7 +103,7 @@
             class="hitbox {selectedClass}"
             cx={$player.position.x}
             cy={$player.position.y}
-            r="100"
+            r={50 / zoom}
         />
     </g>
 {/if}

@@ -123,16 +123,19 @@ export interface ViewBox {
     y: number;
     width: number;
     height: number;
+    zoom: number;
 }
 
 class BoundingBox implements ViewBox {
     topLeft: Position = null;
     bottomRight: Position = null;
+    zoom: number = 1;
 
     clone(): BoundingBox {
         const result = new BoundingBox();
         result.topLeft = this.topLeft.clone();
         result.bottomRight = this.bottomRight.clone();
+        result.zoom = this.zoom;
         return result;
     }
 
@@ -271,11 +274,16 @@ export class StateDisplay {
             requiredWidth = dimensions.width / viewToDisplayScalingFactor;
             requiredHeight = dimensions.height / viewToDisplayScalingFactor;
         }
+        else {
+            viewToDisplayScalingFactor = 1;
+        }
 
         boundingBox.topLeft.x -= (requiredWidth - boundingBox.width) / 2;
         boundingBox.bottomRight.x += (requiredWidth - boundingBox.width)
         boundingBox.topLeft.y -= (requiredHeight - boundingBox.height) / 2;
         boundingBox.bottomRight.y += (requiredHeight - boundingBox.height)
+
+        boundingBox.zoom = viewToDisplayScalingFactor;
 
         return boundingBox;
     }

@@ -9,7 +9,14 @@
   let frameCallbackId: number;
   let running: boolean = true;
 
-  const [finished, zoomMode] = [state.finished, state.zoomMode];
+  const [finished, zoomMode, viewBox] = [
+    state.finished,
+    state.zoomMode,
+    state.viewBox,
+  ];
+
+  let zoom: string;
+  $: zoom = $viewBox.zoom.toFixed(2);
 
   function run() {
     const loop = (timestamp) => {
@@ -60,6 +67,7 @@
     <option value={ZoomMode.SCREEN}>Screen</option>
     <option value={ZoomMode.PLAYERS}>Players</option>
   </select>
+  {zoom}
   {#if running}FPS: {fps}{/if}
 
   <!-- <p>{fps}</p> -->

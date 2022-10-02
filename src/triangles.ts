@@ -1,4 +1,4 @@
-import { derived, readable, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
+import { derived, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
 
 type PlayerId = number;
 const NO_PLAYER: PlayerId = -1;
@@ -147,42 +147,69 @@ export enum ZoomMode {
     PLAYERS
 }
 
+class Triggerable implements Readable<void> {
+    private subscribers: Set<Subscriber<void>> = new Set();
+
+    trigger() {
+        this.subscribers.forEach(subscriber => subscriber());
+    }
+
+    subscribe(subscriber: Subscriber<void>) {
+        this.subscribers.add(subscriber);
+        return () => this.subscribers.delete(subscriber);
+    }
+}
+
 export class StateDisplay {
+
+    private playerStores: Writable<Player>[] = [];
+    private anyPlayerChangedStore: Triggerable = new Triggerable();
+
+    private players_: Writable<Readable<Player>[]> = writable(this.playerStores);
+    players: Readable<Readable<Player>[]> = this.players_;
+
+    private updatePlayerStores() {
+        // playerStores length will always be <= players length i.e. we can only
+        // grow
+        for (let i = this.playerStores.length; i < this.state.players.length; ++i) {
+            this.playerStores.push(writable(this.state.players[i]));
+        }
+        this.players_.set(this.playerStores);
+    }
+
+    private updatePlayers() {
+        this.state.players.forEach(player => this.playerStores[player.id].set(player));
+        this.anyPlayerChangedStore.trigger();
+    }
+
     dimensions: Writable<Dimensions> = writable(new Dimensions(0, 0));
-
-    private updatePlayers: Subscriber<Player[]> = () => { };
-    players: Readable<Player[]> = readable(null, set => {
-        this.updatePlayers = set;
-        this.updatePlayers(this.state.players);
-
-        return () => this.updatePlayers = () => { };
-
-    });
-
     margin: Writable<number> = writable(10);
-
     zoomMode: Writable<ZoomMode> = writable(ZoomMode.SCREEN);
 
+    private updateViewBox: Subscriber<ViewBox> = () => { };
     viewBox: Readable<ViewBox> = derived([
-        this.dimensions, this.players, this.margin, this.zoomMode
-    ], ([dimensions, _, margin, zoomMode]) =>
-        StateDisplay.calculateViewBox(dimensions, margin, zoomMode, this.state.boundingBox));
-
+        this.dimensions, this.margin, this.zoomMode, this.anyPlayerChangedStore
+    ], ([dimensions, margin, zoomMode, _], set) => {
+        this.updateViewBox = set;
+        this.updateViewBox(StateDisplay.calculateViewBox(
+            dimensions, margin, zoomMode, this.state.boundingBox));
+    });
 
     private state: State;
 
     constructor(state: State) {
         this.state = state;
+        this.updatePlayerStores();
         this.state.update();
     }
 
     updatePositions(): StateDisplay {
         this.state.update();
-        this.updatePlayers(this.state.players);
+        this.updatePlayers();
         return this;
     }
 
-    finished: Readable<boolean> = derived(this.players, players =>
+    finished: Readable<boolean> = derived(this.playerStores, players =>
         players.every(player => !player.isMoving()));
 
     private static calculateViewBox(

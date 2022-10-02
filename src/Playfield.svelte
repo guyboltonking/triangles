@@ -39,7 +39,11 @@
                 height="100"
                 patternUnits="userSpaceOnUse"
             >
-                <polyline points="0,100 0,0, 100,0" stroke="red" fill="none" />
+                <polyline
+                    points="0,100 0,0, 100,0"
+                    stroke="lightgreen"
+                    fill="none"
+                />
             </pattern>
             <SvgPlayer displayMode="defs" />
         </defs>
@@ -52,6 +56,9 @@
         />
         {#each $players as player}
             <SvgPlayer displayMode="targets" {player} />
+        {/each}
+        {#each $players as player}
+            <SvgPlayer displayMode="selection" {player} />
         {/each}
         {#each $players as player}
             <SvgPlayer displayMode="player" {player} />

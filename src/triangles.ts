@@ -1,7 +1,31 @@
-import { derived, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
+import { derived, writable, type Readable, type Subscriber, type Unsubscriber, type Updater, type Writable } from "svelte/store";
 
 type PlayerId = number;
 const NO_PLAYER: PlayerId = -1;
+
+class WrappedWritable<T> implements Writable<T> {
+    private delegate: Writable<T>;
+    private value_: T;
+
+    get value(): T { return this.value_; }
+
+    constructor(initialValue: T) {
+        this.delegate = writable(initialValue);
+        this.delegate.subscribe(value => this.value_ = value)
+    }
+
+    set(value: T): void {
+        this.delegate.set(value);
+    }
+
+    update(updater: Updater<T>): void {
+        this.delegate.update(updater);
+    }
+
+    subscribe(run: Subscriber<T>, invalidate?: (value?: T) => void): Unsubscriber {
+        return this.delegate.subscribe(run, invalidate);
+    }
+}
 
 export class Player {
     id: number;
@@ -9,6 +33,7 @@ export class Player {
     position: Position;
     target: Position = null;
     speed: number = 1;
+    selected: WrappedWritable<boolean> = new WrappedWritable(false);
 
     get following(): [Player, Player] {
         return this._following.map(id =>

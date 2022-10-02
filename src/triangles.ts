@@ -211,14 +211,11 @@ export class StateDisplay {
     margin: Writable<number> = writable(10);
     zoomMode: Writable<ZoomMode> = writable(ZoomMode.SCREEN);
 
-    private updateViewBox: Subscriber<ViewBox> = () => { };
     viewBox: Readable<ViewBox> = derived([
         this.dimensions, this.margin, this.zoomMode, this.anyPlayerChangedStore
-    ], ([dimensions, margin, zoomMode, _], set) => {
-        this.updateViewBox = set;
-        this.updateViewBox(StateDisplay.calculateViewBox(
+    ], ([dimensions, margin, zoomMode, _]) =>
+        StateDisplay.calculateViewBox(
             dimensions, margin, zoomMode, this.state.boundingBox));
-    });
 
     private state: State;
 

@@ -1,7 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Playfield from "./Playfield.svelte";
+  import { EditController, type ModalController } from "./controller.js";
   import { state, ZoomMode } from "./model.js";
+  import Playfield from "./Playfield.svelte";
+
+  let controller: ModalController = new EditController();
 
   let lastLoopTimestamp = 0;
   let fps = "0";
@@ -73,4 +76,4 @@
   <!-- <p>{fps}</p> -->
 </div>
 
-<Playfield id="display" {state} />
+<Playfield id="display" {state} {controller} />

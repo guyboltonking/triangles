@@ -2,9 +2,11 @@
     import { onMount } from "svelte";
     import SvgPlayer from "./SvgPlayer.svelte";
     import { Dimensions, StateDisplay } from "./model.js";
+    import type { ModalController } from "./controller";
 
     export let state: StateDisplay;
     export let id: string;
+    export let controller: ModalController;
 
     const [dimensions, viewBox, players] = [
         state.dimensions,
@@ -56,15 +58,16 @@
             width={$viewBox.width}
             height={$viewBox.height}
             fill="url(#grid)"
+            on:click={controller.clickBackground()}
         />
         {#each $players as player}
-            <SvgPlayer displayMode="targets" {player} />
+            <SvgPlayer displayMode="targets" {player} {controller} />
         {/each}
         {#each $players as player}
-            <SvgPlayer displayMode="selection" {player} />
+            <SvgPlayer displayMode="selection" {player} {controller} />
         {/each}
         {#each $players as player}
-            <SvgPlayer displayMode="player" {player} {zoom} />
+            <SvgPlayer displayMode="player" {player} {controller} {zoom} />
         {/each}
     </svg>
 </div>

@@ -2,11 +2,14 @@
 
 <script lang="ts">
     import { writable, type Readable, type Writable } from "svelte/store";
+    import type { ModalController } from "./controller.js";
     import { Player, Vector } from "./model.js";
 
     const arrowWidth = 6;
 
     export let player: Readable<Player> = null;
+    export let controller: ModalController;
+
     let selected: Writable<boolean> = writable(false);
 
     export let displayMode: string;
@@ -14,14 +17,6 @@
 
     if (player != null) {
         selected = $player.selected;
-    }
-
-    function select() {
-        $selected = true;
-    }
-
-    function deselect() {
-        $selected = false;
     }
 
     let selectedClass;
@@ -93,8 +88,9 @@
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <g
         pointer-events="all"
-        on:mouseover={select}
-        on:mouseout={deselect}
+        on:click={controller.click($player)}
+        on:mouseover={controller.mouseOver($player)}
+        on:mouseout={controller.mouseOut($player)}
         class="player {selectedClass}"
     >
         <circle cx={$player.position.x} cy={$player.position.y} r="2" />

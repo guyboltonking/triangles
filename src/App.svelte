@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Playfield from "./Playfield.svelte";
-  import { state, ZoomMode } from "./triangles.js";
+  import { state, ZoomMode } from "./model.js";
 
   let lastLoopTimestamp = 0;
   let fps = "0";

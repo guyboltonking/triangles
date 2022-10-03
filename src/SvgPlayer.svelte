@@ -2,7 +2,7 @@
 
 <script lang="ts">
     import { writable, type Readable, type Writable } from "svelte/store";
-    import { Player, Vector } from "./triangles.js";
+    import { Player, Vector } from "./model.js";
 
     const arrowWidth = 6;
 

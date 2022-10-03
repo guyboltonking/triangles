@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import SvgPlayer from "./SvgPlayer.svelte";
-    import { Dimensions, StateDisplay } from "./triangles.js";
+    import { Dimensions, StateDisplay } from "./model.js";
 
     export let state: StateDisplay;
     export let id: string;

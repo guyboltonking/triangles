@@ -29,11 +29,13 @@ class Editing extends NullController {
 
     static instance(player: Player): ModalController {
         viewState.highlightedPlayer.set(player);
+        viewState.showFollowingSelectors.set(true);
         return Editing.INSTANCE;
     }
 
     clickBackground(): ModalController {
         viewState.highlightedPlayer.set(null);
+        viewState.showFollowingSelectors.set(false);
         return NoSelection.instance();
     }
 

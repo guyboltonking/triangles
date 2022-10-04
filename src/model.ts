@@ -5,7 +5,7 @@ const NO_PLAYER: PlayerId = -1;
 
 export class Player {
     id: number;
-    private _following: [PlayerId, PlayerId] = [null, null];
+    private _following: [PlayerId, PlayerId] = [NO_PLAYER, NO_PLAYER];
     position: Position;
     target: Position = null;
     speed: number = 1;

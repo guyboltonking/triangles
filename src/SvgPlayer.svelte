@@ -1,7 +1,7 @@
 <svelte:options namespace="svg" />
 
 <script lang="ts">
-    import { derived, readable, type Readable } from "svelte/store";
+    import { readable, type Readable } from "svelte/store";
     import type { ModalController } from "./controller.js";
     import { Player, Vector } from "./model.js";
     import { viewState } from "./view.js";
@@ -11,20 +11,41 @@
     export let player: Readable<Player> = null;
     export let controller: ModalController = null;
 
+    let showFollowingSelectors = viewState.showFollowingSelectors;
+
     let selected: Readable<boolean> = readable(false);
+    let following1: Readable<boolean> = readable(false);
+    let following2: Readable<boolean> = readable(false);
 
     if (player != null) {
-        selected = derived(
-            [player, viewState.highlightedPlayer],
-            ([player, highlightedPlayer]) => player == highlightedPlayer
-        );
+        selected = viewState.selected($player);
+        following1 = viewState.following(0, $player);
+        following2 = viewState.following(1, $player);
     }
 
-    let selectedClass;
+    let selectedClass, following1Class, following2Class;
     $: selectedClass = $selected ? "selected" : "";
+    $: {
+        if ($following1) {
+            following1Class = "selected";
+            following2Class = "unselectable";
+        } else if ($following2) {
+            following1Class = "unselectable";
+            following2Class = "selected";
+        } else {
+            following1Class = "selectable";
+            following2Class = "selectable";
+        }
+    }
 
     export let displayMode: string;
     export let zoom: number = 1;
+
+    const TEXT_OFFSET = 5;
+    const PLAYER_RADIUS = 5;
+    const PLAYER_HITBOX_RADIUS = 50;
+    const FOLLOWING_SELECTOR_OFFSET = 15;
+    const FOLLOWING_HITBOX_RADIUS = 10;
 </script>
 
 {#if displayMode == "defs"}
@@ -68,7 +89,7 @@
                     class="target"
                     cx={$player.target.x}
                     cy={$player.target.y}
-                    r="2"
+                    r="5"
                 />
                 {#if Vector.between($player.position, $player.target).distance() > arrowWidth}
                     <line
@@ -82,8 +103,8 @@
                 {/if}
                 <text
                     class="target {selectedClass}"
-                    x={$player.target.x}
-                    y={$player.target.y}>{$player.id}</text
+                    x={$player.target.x - TEXT_OFFSET * 2}
+                    y={$player.target.y - TEXT_OFFSET}>{$player.id}</text
                 >
             {/if}
         </g>
@@ -97,15 +118,39 @@
         on:mouseout={() => controller.mouseOut($player)}
         class="player {selectedClass}"
     >
-        <circle cx={$player.position.x} cy={$player.position.y} r="2" />
-        <text x={$player.position.x} y={$player.position.y}>{$player.id}</text>
+        <circle
+            cx={$player.position.x}
+            cy={$player.position.y}
+            r={PLAYER_RADIUS}
+        />
+        <text
+            x={$player.position.x + TEXT_OFFSET}
+            y={$player.position.y - TEXT_OFFSET}>{$player.id}</text
+        >
         <circle
             class="hitbox {selectedClass}"
             cx={$player.position.x}
             cy={$player.position.y}
-            r={50 / zoom}
+            r={PLAYER_HITBOX_RADIUS / zoom}
+            stroke-width={Math.min(1, 1 / zoom)}
         />
     </g>
+    {#if $showFollowingSelectors && !$selected}
+        <circle
+            class="following {following1Class}"
+            cx={$player.position.x + FOLLOWING_SELECTOR_OFFSET / zoom}
+            cy={$player.position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
+            r={FOLLOWING_HITBOX_RADIUS / zoom}
+            stroke-width={Math.min(1, 1 / zoom)}
+        />
+        <circle
+            class="following {following2Class}"
+            cx={$player.position.x - FOLLOWING_SELECTOR_OFFSET / zoom}
+            cy={$player.position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
+            r={FOLLOWING_HITBOX_RADIUS / zoom}
+            stroke-width={Math.min(1, 1 / zoom)}
+        />
+    {/if}
 {/if}
 
 <style>
@@ -123,6 +168,23 @@
         stroke: blue;
     }
 
+    .following {
+        stroke: blue;
+        fill: blue;
+        fill-opacity: 10%;
+    }
+
+    .following.selected {
+        fill-opacity: 100%;
+    }
+    .following.selectable {
+        fill-opacity: 10%;
+    }
+    .following.unselectable {
+        fill: none;
+        stroke: grey;
+    }
+
     .target line {
         stroke-dasharray: 5, 2;
     }
@@ -130,17 +192,20 @@
     .target.targets circle,
     .target.targets line,
     .target.targets text {
-        fill: lightgrey;
+        fill: none;
+        stroke: lightgrey;
     }
     .target.selection circle,
     .target.selection line,
     .target.selection text {
         fill: none;
+        stroke: none;
     }
     .target.selection.selected circle,
     .target.selection.selected line,
     .target.selection.selected text {
-        fill: red;
+        fill: none;
+        stroke: red;
     }
 
     .target .triangle {

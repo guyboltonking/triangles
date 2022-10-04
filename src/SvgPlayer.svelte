@@ -1,26 +1,30 @@
 <svelte:options namespace="svg" />
 
 <script lang="ts">
-    import { writable, type Readable, type Writable } from "svelte/store";
+    import { derived, readable, type Readable } from "svelte/store";
     import type { ModalController } from "./controller.js";
     import { Player, Vector } from "./model.js";
+    import { viewState } from "./view.js";
 
     const arrowWidth = 6;
 
     export let player: Readable<Player> = null;
-    export let controller: ModalController;
+    export let controller: ModalController = null;
 
-    let selected: Writable<boolean> = writable(false);
-
-    export let displayMode: string;
-    export let zoom: number = 1;
+    let selected: Readable<boolean> = readable(false);
 
     if (player != null) {
-        selected = $player.selected;
+        selected = derived(
+            [player, viewState.highlightedPlayer],
+            ([player, highlightedPlayer]) => player == highlightedPlayer
+        );
     }
 
     let selectedClass;
     $: selectedClass = $selected ? "selected" : "";
+
+    export let displayMode: string;
+    export let zoom: number = 1;
 </script>
 
 {#if displayMode == "defs"}
@@ -88,9 +92,9 @@
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <g
         pointer-events="all"
-        on:click={controller.click($player)}
-        on:mouseover={controller.mouseOver($player)}
-        on:mouseout={controller.mouseOut($player)}
+        on:click={() => controller.click($player)}
+        on:mouseover={() => controller.mouseOver($player)}
+        on:mouseout={() => controller.mouseOut($player)}
         class="player {selectedClass}"
     >
         <circle cx={$player.position.x} cy={$player.position.y} r="2" />

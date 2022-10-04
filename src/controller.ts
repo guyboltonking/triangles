@@ -1,4 +1,5 @@
 import type { Player } from "./model";
+import { viewState } from "./view";
 
 export interface ModalController {
     clickBackground(): ModalController;
@@ -27,18 +28,17 @@ class Editing extends NullController {
     private player: Player;
 
     static instance(player: Player): ModalController {
-        Editing.INSTANCE.player = player;
-        player.selected.set(true);
+        viewState.highlightedPlayer.set(player);
         return Editing.INSTANCE;
     }
 
     clickBackground(): ModalController {
-        this.player.selected.set(false);
+        viewState.highlightedPlayer.set(null);
         return NoSelection.instance();
     }
 
     click(player: Player): ModalController {
-        this.player.selected.set(false);
+        viewState.highlightedPlayer.set(player);
         return Editing.instance(player);
     }
 }
@@ -55,12 +55,12 @@ class NoSelection extends NullController {
     }
 
     mouseOver(player: Player): ModalController {
-        player.selected.set(true);
+        viewState.highlightedPlayer.set(player);
         return this;
     }
 
     mouseOut(player: Player): ModalController {
-        player.selected.set(false);
+        viewState.highlightedPlayer.set(null);
         return this;
     }
 }

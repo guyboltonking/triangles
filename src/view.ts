@@ -1,7 +1,7 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
 import type { Player, Position, StateDisplay } from "./model";
 
-export class ViewState {
+export class EditingState {
     private state: StateDisplay;
     selectedPlayer: Writable<Player> = writable(null);
     showFollowingSelectors: Writable<boolean> = writable(false);

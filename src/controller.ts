@@ -1,15 +1,15 @@
 import { Position, type Player } from "./model";
-import type { ViewState } from "./view";
+import type { EditingState } from "./view";
 
 export enum EditorMode {
     EDIT, ADD, DELETE
 };
 
 export abstract class ModalController {
-    protected viewState: ViewState;
+    protected editingState: EditingState;
 
-    constructor(viewState: ViewState) {
-        this.viewState = viewState;
+    constructor(editingState: EditingState) {
+        this.editingState = editingState;
     }
 
     setMode(editorMode: EditorMode): ModalController {
@@ -35,8 +35,8 @@ export abstract class ModalController {
 abstract class ControllerWithEditors extends ModalController {
     protected editors: Editors;
 
-    constructor(viewState: ViewState, editors: Editors) {
-        super(viewState);
+    constructor(editingState: EditingState, editors: Editors) {
+        super(editingState);
         this.editors = editors;
     }
 }
@@ -58,12 +58,12 @@ class NoSelection extends ControllerWithEditors {
     }
 
     mouseOver(player: Player): ModalController {
-        this.viewState.selectedPlayer.set(player);
+        this.editingState.selectedPlayer.set(player);
         return this;
     }
 
     mouseOut(player: Player): ModalController {
-        this.viewState.selectedPlayer.set(null);
+        this.editingState.selectedPlayer.set(null);
         return this;
     }
 }
@@ -72,7 +72,7 @@ class Editing extends ControllerWithEditors {
     setMode(editorMode: EditorMode): ModalController {
         switch (editorMode) {
             case EditorMode.DELETE:
-                this.viewState.stopEditing();
+                this.editingState.stopEditing();
                 return this.editors.deleting;
             case EditorMode.ADD:
                 return this.editors.addingEditing;
@@ -82,17 +82,17 @@ class Editing extends ControllerWithEditors {
     }
 
     clickBackground(): ModalController {
-        this.viewState.stopEditing();
+        this.editingState.stopEditing();
         return this.editors.noSelection;
     }
 
     click(player: Player): ModalController {
-        this.viewState.startEditing(player);
+        this.editingState.startEditing(player);
         return this;
     }
 
     clickFollowing(followingIndex: number, player: Player): ModalController {
-        this.viewState.selectedFollowing(followingIndex, player);
+        this.editingState.selectedFollowing(followingIndex, player);
         return this;
     }
 }
@@ -110,7 +110,7 @@ class Deleting extends NoSelection {
     }
 
     click(player: Player): ModalController {
-        this.viewState.delete(player);
+        this.editingState.delete(player);
         return this;
     }
 }
@@ -121,7 +121,7 @@ class AddingEditing extends Editing {
             case EditorMode.EDIT:
                 return this.editors.editing;
             case EditorMode.DELETE:
-                this.viewState.stopEditing();
+                this.editingState.stopEditing();
                 return this.editors.deleting;
             default:
                 return this;
@@ -129,8 +129,8 @@ class AddingEditing extends Editing {
     }
 
     clickBackground(/* TODO position */): ModalController {
-        this.viewState.stopEditing();
-        this.viewState.add(new Position(0, 0));
+        this.editingState.stopEditing();
+        this.editingState.add(new Position(0, 0));
         return this;
     }
 }
@@ -148,7 +148,7 @@ class AddingNoSelection extends NoSelection {
     }
 
     click(player: Player): ModalController {
-        this.viewState.startEditing(player);
+        this.editingState.startEditing(player);
         return this.editors.addingEditing;
     }
 
@@ -168,16 +168,16 @@ class Editors {
 export class EditController extends ModalController {
     private controller: ModalController;
 
-    constructor(viewState: ViewState) {
-        super(viewState);
+    constructor(editingState: EditingState) {
+        super(editingState);
 
         let editors: Editors = new Editors();
 
-        editors.noSelection = new NoSelection(viewState, editors);
-        editors.editing = new Editing(viewState, editors);
-        editors.addingEditing = new AddingEditing(viewState, editors);
-        editors.addingNoSelection = new AddingNoSelection(viewState, editors);
-        editors.deleting = new Deleting(viewState, editors);
+        editors.noSelection = new NoSelection(editingState, editors);
+        editors.editing = new Editing(editingState, editors);
+        editors.addingEditing = new AddingEditing(editingState, editors);
+        editors.addingNoSelection = new AddingNoSelection(editingState, editors);
+        editors.deleting = new Deleting(editingState, editors);
 
         this.controller = editors.noSelection;
     }

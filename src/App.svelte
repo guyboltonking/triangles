@@ -4,7 +4,7 @@
   import { createStateDisplay, ZoomMode } from "./model.js";
   import PlayerEditor from "./PlayerEditor.svelte";
   import Playfield from "./Playfield.svelte";
-  import { ViewState } from "./view.js";
+  import { EditingState } from "./view.js";
 
   let lastLoopTimestamp = 0;
   let fps = "0";
@@ -13,9 +13,9 @@
   let running: boolean = true;
 
   let state = createStateDisplay();
-  let viewState = new ViewState(state);
+  let editingState = new EditingState(state);
 
-  let controller: ModalController = new EditController(viewState);
+  let controller: ModalController = new EditController(editingState);
 
   const [finished, zoomMode, viewBox] = [
     state.finished,
@@ -80,4 +80,4 @@
   <PlayerEditor {controller} />
 </div>
 
-<Playfield id="display" {state} {controller} {viewState} />
+<Playfield id="display" {state} {controller} {editingState} />

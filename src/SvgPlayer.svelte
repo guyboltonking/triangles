@@ -4,24 +4,24 @@
     import { readable, type Readable } from "svelte/store";
     import type { ModalController } from "./controller.js";
     import { Player, Vector } from "./model.js";
-    import type { ViewState } from "./view.js";
+    import type { EditingState } from "./view.js";
 
     const arrowWidth = 6;
 
     export let player: Readable<Player> = null;
     export let controller: ModalController = null;
-    export let viewState: ViewState = null;
+    export let editingState: EditingState = null;
 
-    let showFollowingSelectors = viewState?.showFollowingSelectors;
+    let showFollowingSelectors = editingState?.showFollowingSelectors;
 
     let selected: Readable<boolean> = readable(false);
     let following1: Readable<boolean> = readable(false);
     let following2: Readable<boolean> = readable(false);
 
     if (player != null) {
-        selected = viewState.isSelected($player);
-        following1 = viewState.selectedIsFollowing(0, $player);
-        following2 = viewState.selectedIsFollowing(1, $player);
+        selected = editingState.isSelected($player);
+        following1 = editingState.selectedIsFollowing(0, $player);
+        following2 = editingState.selectedIsFollowing(1, $player);
     }
 
     let selectedClass, following1Class, following2Class;

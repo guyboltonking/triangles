@@ -1,6 +1,6 @@
 <script lang="ts">
     import { EditorMode, type ModalController } from "./controller";
-    import type { ViewState } from "./view";
+    import type { EditingState } from "./view";
 
     export let controller: ModalController;
 

@@ -5,6 +5,7 @@ const NO_PLAYER: PlayerId = -1;
 
 export class Player {
     id: number;
+    private state: State;
     private _following: [PlayerId, PlayerId] = [NO_PLAYER, NO_PLAYER];
     position: Position;
     target: Position = null;
@@ -15,6 +16,12 @@ export class Player {
             id != NO_PLAYER ? this.state.players[id] : null) as [Player, Player];
     }
 
+    follow(followingIndex: number, followingPlayerId: PlayerId) {
+        if (followingPlayerId != this.id && this._following.every(id => id != followingPlayerId)) {
+            this._following[followingIndex] = followingPlayerId;
+        }
+    }
+
     isFollowing(): boolean {
         return this._following.every(id => id != NO_PLAYER);
     }
@@ -22,8 +29,6 @@ export class Player {
     isMoving(): boolean {
         return this.target != null && this.position != this.target;
     }
-
-    private state: State;
 
     constructor(state: State, following: [PlayerId, PlayerId]) {
         this.state = state;
@@ -209,6 +214,11 @@ export class StateDisplay {
         return this;
     }
 
+    follow(playerId: number, followingId: number, followingPlayerId: number) {
+        this.state.follow(playerId, followingId, followingPlayerId);
+        this.updatePlayers();
+    }
+
     finished: Readable<boolean> = derived(this.playerStores, players =>
         players.every(player => !player.isMoving()));
 
@@ -309,7 +319,7 @@ class State {
                 [player, target1] : [target2, target1];
     }
 
-    private calculateNewTargets() {
+    private calculateNewTargets(boundingBox: BoundingBox) {
         for (const player of this.players) {
             if (player.isFollowing()) {
                 const targets = State.calculateTargets(
@@ -317,7 +327,7 @@ class State {
                     player.following[0].position,
                     player.following[1].position,
                 );
-                targets.forEach(target => this.boundingBox.expand(target));
+                targets.forEach(target => boundingBox?.expand(target));
                 player.target = targets[0];
             }
             else {
@@ -326,7 +336,7 @@ class State {
         }
     }
 
-    private calculateNewPositions() {
+    private calculateNewPositions(boundingBox: BoundingBox) {
         for (const player of this.players) {
             if (player.target != null) {
                 const targetVector =
@@ -341,14 +351,19 @@ class State {
                     player.position = player.target;
                 }
             }
-            this.boundingBox.expand(player.position);
+            boundingBox?.expand(player.position);
         }
     }
 
     update() {
         this.boundingBox = new BoundingBox();
-        this.calculateNewTargets();
-        this.calculateNewPositions();
+        this.calculateNewTargets(this.boundingBox);
+        this.calculateNewPositions(this.boundingBox);
+    }
+
+    follow(playerId: number, followingIndex: number, followingPlayerId: number) {
+        this.players[playerId].follow(followingIndex, followingPlayerId);
+        this.calculateNewTargets(null);
     }
 }
 

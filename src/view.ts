@@ -1,23 +1,38 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import type { Player } from "./model";
+import { state, type Player, type StateDisplay } from "./model";
 
 class ViewState {
-    highlightedPlayer: Writable<Player> = writable(null);
+    private state: StateDisplay;
+    selectedPlayer: Writable<Player> = writable(null);
     showFollowingSelectors: Writable<boolean> = writable(false);
 
-    selected(player: Player): Readable<boolean> {
+    constructor(state: StateDisplay) {
+        this.state = state;
+    }
+
+    isSelected(player: Player): Readable<boolean> {
         return derived(
-            this.highlightedPlayer,
+            this.selectedPlayer,
             highlightedPlayer => player == highlightedPlayer
         );
     }
 
-    following(followingId: number, player: Player): Readable<boolean> {
+    selectedIsFollowing(followingIndex: number, player: Player): Readable<boolean> {
         return derived(
-            this.highlightedPlayer,
-            highlightedPlayer => highlightedPlayer?.following[followingId] == player
+            this.selectedPlayer,
+            selectedPlayer => selectedPlayer?.following[followingIndex] == player
         );
     }
+
+    selectedFollowing(followingIndex: number, followedPlayer: Player) {
+        this.selectedPlayer.update(selectedPlayer => {
+            if (selectedPlayer) {
+                state.follow(selectedPlayer.id, followingIndex, followedPlayer.id);
+            }
+            return selectedPlayer;
+        });
+    }
+
 }
 
-export const viewState = new ViewState();
+export const viewState = new ViewState(state);

@@ -18,9 +18,9 @@
     let following2: Readable<boolean> = readable(false);
 
     if (player != null) {
-        selected = viewState.selected($player);
-        following1 = viewState.following(0, $player);
-        following2 = viewState.following(1, $player);
+        selected = viewState.isSelected($player);
+        following1 = viewState.selectedIsFollowing(0, $player);
+        following2 = viewState.selectedIsFollowing(1, $player);
     }
 
     let selectedClass, following1Class, following2Class;
@@ -137,6 +137,8 @@
     </g>
     {#if $showFollowingSelectors && !$selected}
         <circle
+            pointer-events="all"
+            on:click={() => controller.clickFollowing(0, $player)}
             class="following {following1Class}"
             cx={$player.position.x + FOLLOWING_SELECTOR_OFFSET / zoom}
             cy={$player.position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
@@ -144,6 +146,8 @@
             stroke-width={Math.min(1, 1 / zoom)}
         />
         <circle
+            pointer-events="all"
+            on:click={() => controller.clickFollowing(1, $player)}
             class="following {following2Class}"
             cx={$player.position.x - FOLLOWING_SELECTOR_OFFSET / zoom}
             cy={$player.position.y + FOLLOWING_SELECTOR_OFFSET / zoom}

@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import SvgPlayer from "./SvgPlayer.svelte";
-    import { Dimensions, StateDisplay } from "./model.js";
     import type { ModalController } from "./controller";
+    import { Dimensions, StateDisplay } from "./model.js";
+    import SvgPlayer from "./SvgPlayer.svelte";
 
     export let state: StateDisplay;
     export let id: string;
@@ -58,7 +58,7 @@
             width={$viewBox.width}
             height={$viewBox.height}
             fill="url(#grid)"
-            on:click={controller.clickBackground()}
+            on:click={() => controller.clickBackground()}
         />
         {#each $players as player}
             <SvgPlayer displayMode="targets" {player} {controller} />

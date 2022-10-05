@@ -72,8 +72,6 @@
   </select>
   {zoom}
   {#if running}FPS: {fps}{/if}
-
-  <!-- <p>{fps}</p> -->
 </div>
 
 <Playfield id="display" {state} {controller} />

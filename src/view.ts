@@ -1,5 +1,5 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import type { Player, StateDisplay } from "./model";
+import type { Player, Position, StateDisplay } from "./model";
 
 export class ViewState {
     private state: StateDisplay;
@@ -8,6 +8,20 @@ export class ViewState {
 
     constructor(state: StateDisplay) {
         this.state = state;
+    }
+
+    startEditing(player: Player) {
+        this.selectedPlayer.set(player);
+        this.showFollowingSelectors.set(true);
+    }
+
+    stopEditing() {
+        this.selectedPlayer.set(null);
+        this.showFollowingSelectors.set(false);
+    }
+
+    highlight(player: Player) {
+        this.selectedPlayer.set(player);
     }
 
     isSelected(player: Player): Readable<boolean> {
@@ -31,6 +45,14 @@ export class ViewState {
             }
             return selectedPlayer;
         });
+    }
+
+    add(position: Position) {
+        // TODO
+    }
+
+    delete(player: Player) {
+        // TODO
     }
 
 }

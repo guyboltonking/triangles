@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { EditController, ModalController } from "./controller.js";
-  import EditorMode from "./EditorMode.svelte";
   import { createStateDisplay, ZoomMode } from "./model.js";
   import PlayerEditor from "./PlayerEditor.svelte";
   import Playfield from "./Playfield.svelte";
@@ -78,8 +77,7 @@
   </select>
   {zoom}
   {#if running}FPS: {fps}{/if}
-  <EditorMode />
-  <PlayerEditor />
+  <PlayerEditor {controller} />
 </div>
 
 <Playfield id="display" {state} {controller} {viewState} />

@@ -1,5 +1,9 @@
-import type { Player } from "./model";
+import { Position, type Player } from "./model";
 import type { ViewState } from "./view";
+
+export enum EditorMode {
+    EDIT, ADD, DELETE
+};
 
 export abstract class ModalController {
     protected viewState: ViewState;
@@ -8,6 +12,9 @@ export abstract class ModalController {
         this.viewState = viewState;
     }
 
+    setMode(editorMode: EditorMode): ModalController {
+        return this;
+    }
     clickBackground(): ModalController {
         return this;
     }
@@ -25,24 +32,63 @@ export abstract class ModalController {
     }
 }
 
-class Editing extends ModalController {
-    noSelection: NoSelection;
+abstract class ControllerWithEditors extends ModalController {
+    protected editors: Editors;
 
-    startEditing(player: Player): ModalController {
-        this.viewState.selectedPlayer.set(player);
-        this.viewState.showFollowingSelectors.set(true);
-        return this;
+    constructor(viewState: ViewState, editors: Editors) {
+        super(viewState);
+        this.editors = editors;
     }
+}
 
-    clickBackground(): ModalController {
-        this.viewState.selectedPlayer.set(null);
-        this.viewState.showFollowingSelectors.set(false);
-        return this.noSelection;
+class NoSelection extends ControllerWithEditors {
+    setMode(editorMode: EditorMode): ModalController {
+        switch (editorMode) {
+            case EditorMode.DELETE:
+                return this.editors.deleting;
+            case EditorMode.ADD:
+                return this.editors.addingNoSelection;
+            default:
+                return this;
+        }
     }
 
     click(player: Player): ModalController {
+        return this.editors.editing.click(player);
+    }
+
+    mouseOver(player: Player): ModalController {
         this.viewState.selectedPlayer.set(player);
-        return this.noSelection;
+        return this;
+    }
+
+    mouseOut(player: Player): ModalController {
+        this.viewState.selectedPlayer.set(null);
+        return this;
+    }
+}
+
+class Editing extends ControllerWithEditors {
+    setMode(editorMode: EditorMode): ModalController {
+        switch (editorMode) {
+            case EditorMode.DELETE:
+                this.viewState.stopEditing();
+                return this.editors.deleting;
+            case EditorMode.ADD:
+                return this.editors.addingEditing;
+            default:
+                return this;
+        }
+    }
+
+    clickBackground(): ModalController {
+        this.viewState.stopEditing();
+        return this.editors.noSelection;
+    }
+
+    click(player: Player): ModalController {
+        this.viewState.startEditing(player);
+        return this;
     }
 
     clickFollowing(followingIndex: number, player: Player): ModalController {
@@ -51,22 +97,72 @@ class Editing extends ModalController {
     }
 }
 
-class NoSelection extends ModalController {
-    editing: Editing;
+class Deleting extends NoSelection {
+    setMode(editorMode: EditorMode): ModalController {
+        switch (editorMode) {
+            case EditorMode.EDIT:
+                return this.editors.noSelection;
+            case EditorMode.ADD:
+                return this.editors.addingNoSelection;
+            default:
+                return this;
+        }
+    }
 
     click(player: Player): ModalController {
-        return this.editing.startEditing(player);
-    }
-
-    mouseOver(player: Player): ModalController {
-        this.viewState.selectedPlayer.set(player);
+        this.viewState.delete(player);
         return this;
     }
+}
 
-    mouseOut(player: Player): ModalController {
-        this.viewState.selectedPlayer.set(null);
+class AddingEditing extends Editing {
+    setMode(editorMode: EditorMode): ModalController {
+        switch (editorMode) {
+            case EditorMode.EDIT:
+                return this.editors.editing;
+            case EditorMode.DELETE:
+                this.viewState.stopEditing();
+                return this.editors.deleting;
+            default:
+                return this;
+        }
+    }
+
+    clickBackground(/* TODO position */): ModalController {
+        this.viewState.stopEditing();
+        this.viewState.add(new Position(0, 0));
         return this;
     }
+}
+
+class AddingNoSelection extends NoSelection {
+    setMode(editorMode: EditorMode): ModalController {
+        switch (editorMode) {
+            case EditorMode.EDIT:
+                return this.editors.noSelection;
+            case EditorMode.DELETE:
+                return this.editors.deleting;
+            default:
+                return this;
+        }
+    }
+
+    click(player: Player): ModalController {
+        this.viewState.startEditing(player);
+        return this.editors.addingEditing;
+    }
+
+    clickBackground(/* TODO position */): ModalController {
+        return this.editors.addingEditing.clickBackground();
+    }
+}
+
+class Editors {
+    noSelection: NoSelection;
+    editing: Editing;
+    addingEditing: AddingEditing;
+    addingNoSelection: AddingNoSelection;
+    deleting: Deleting;
 }
 
 export class EditController extends ModalController {
@@ -75,31 +171,44 @@ export class EditController extends ModalController {
     constructor(viewState: ViewState) {
         super(viewState);
 
-        let noSelection = new NoSelection(viewState);
-        let editing = new Editing(viewState);
-        editing.noSelection = noSelection;
-        noSelection.editing = editing;
+        let editors: Editors = new Editors();
 
-        this.controller = noSelection;
+        editors.noSelection = new NoSelection(viewState, editors);
+        editors.editing = new Editing(viewState, editors);
+        editors.addingEditing = new AddingEditing(viewState, editors);
+        editors.addingNoSelection = new AddingNoSelection(viewState, editors);
+        editors.deleting = new Deleting(viewState, editors);
+
+        this.controller = editors.noSelection;
+    }
+
+    setMode(editorMode: EditorMode): ModalController {
+        this.controller = this.controller.setMode(editorMode);
+        return this;
     }
 
     clickBackground(): ModalController {
-        return this.controller = this.controller.clickBackground();
+        this.controller = this.controller.clickBackground();
+        return this;
     }
 
     click(player: Player): ModalController {
-        return this.controller = this.controller.click(player);
+        this.controller = this.controller.click(player);
+        return this;
     }
 
     clickFollowing(followingIndex: number, player: Player): ModalController {
-        return this.controller = this.controller.clickFollowing(followingIndex, player);
+        this.controller = this.controller.clickFollowing(followingIndex, player);
+        return this;
     }
 
     mouseOver(player: Player): ModalController {
-        return this.controller = this.controller.mouseOver(player);
+        this.controller = this.controller.mouseOver(player);
+        return this;
     }
 
     mouseOut(player: Player): ModalController {
-        return this.controller = this.controller.mouseOut(player);
+        this.controller = this.controller.mouseOut(player);
+        return this;
     }
 }

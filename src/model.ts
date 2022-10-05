@@ -58,7 +58,7 @@ export class Dimensions extends XY {
     set height(height: number) { this.y = height; }
 }
 
-class Position extends XY {
+export class Position extends XY {
     static CLOSE_ENOUGH: number = 1;
 
     clone(): Position {

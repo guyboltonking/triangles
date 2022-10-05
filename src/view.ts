@@ -1,7 +1,7 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { state, type Player, type StateDisplay } from "./model";
+import type { Player, StateDisplay } from "./model";
 
-class ViewState {
+export class ViewState {
     private state: StateDisplay;
     selectedPlayer: Writable<Player> = writable(null);
     showFollowingSelectors: Writable<boolean> = writable(false);
@@ -27,12 +27,10 @@ class ViewState {
     selectedFollowing(followingIndex: number, followedPlayer: Player) {
         this.selectedPlayer.update(selectedPlayer => {
             if (selectedPlayer) {
-                state.follow(selectedPlayer.id, followingIndex, followedPlayer.id);
+                this.state.follow(selectedPlayer.id, followingIndex, followedPlayer.id);
             }
             return selectedPlayer;
         });
     }
 
 }
-
-export const viewState = new ViewState(state);

@@ -4,14 +4,15 @@
     import { readable, type Readable } from "svelte/store";
     import type { ModalController } from "./controller.js";
     import { Player, Vector } from "./model.js";
-    import { viewState } from "./view.js";
+    import type { ViewState } from "./view.js";
 
     const arrowWidth = 6;
 
     export let player: Readable<Player> = null;
     export let controller: ModalController = null;
+    export let viewState: ViewState = null;
 
-    let showFollowingSelectors = viewState.showFollowingSelectors;
+    let showFollowingSelectors = viewState?.showFollowingSelectors;
 
     let selected: Readable<boolean> = readable(false);
     let following1: Readable<boolean> = readable(false);

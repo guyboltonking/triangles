@@ -367,14 +367,15 @@ class State {
     }
 }
 
-let state_ = new State();
+export function createStateDisplay(): StateDisplay {
+    let state = new State();
 
-state_.addPlayer(1, 2, 1000 / 2, 1000 / 2);
-state_.addPlayer(0, 2, 2000 / 2, 1000 / 2);
-state_.addPlayer(1, 3, 1000 / 2, 2000 / 2);
-state_.addPlayer(0, 4, 3000 / 2, 2000 / 2);
-state_.addPlayer(3, 2, 1000 / 2, 2000 / 2);
-state_.addPlayer(4, 3, 1000 / 2, 2000 / 2);
+    state.addPlayer(1, 2, 1000 / 2, 1000 / 2);
+    state.addPlayer(0, 2, 2000 / 2, 1000 / 2);
+    state.addPlayer(1, 3, 1000 / 2, 2000 / 2);
+    state.addPlayer(0, 4, 3000 / 2, 2000 / 2);
+    state.addPlayer(3, 2, 1000 / 2, 2000 / 2);
+    state.addPlayer(4, 3, 1000 / 2, 2000 / 2);
 
-
-export const state = new StateDisplay(state_);
+    return new StateDisplay(state);
+}

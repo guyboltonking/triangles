@@ -1,16 +1,22 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { EditController, type ModalController } from "./controller.js";
-  import { state, ZoomMode } from "./model.js";
+  import { EditController, ModalController } from "./controller.js";
+  import EditorMode from "./EditorMode.svelte";
+  import { createStateDisplay, ZoomMode } from "./model.js";
+  import PlayerEditor from "./PlayerEditor.svelte";
   import Playfield from "./Playfield.svelte";
-
-  let controller: ModalController = new EditController();
+  import { ViewState } from "./view.js";
 
   let lastLoopTimestamp = 0;
   let fps = "0";
 
   let frameCallbackId: number;
   let running: boolean = true;
+
+  let state = createStateDisplay();
+  let viewState = new ViewState(state);
+
+  let controller: ModalController = new EditController(viewState);
 
   const [finished, zoomMode, viewBox] = [
     state.finished,
@@ -72,6 +78,8 @@
   </select>
   {zoom}
   {#if running}FPS: {fps}{/if}
+  <EditorMode />
+  <PlayerEditor />
 </div>
 
-<Playfield id="display" {state} {controller} />
+<Playfield id="display" {state} {controller} {viewState} />

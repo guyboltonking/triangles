@@ -1,7 +1,13 @@
 import type { Player } from "./model";
-import { viewState } from "./view";
+import type { ViewState } from "./view";
 
 export abstract class ModalController {
+    protected viewState: ViewState;
+
+    constructor(viewState: ViewState) {
+        this.viewState = viewState;
+    }
+
     clickBackground(): ModalController {
         return this;
     }
@@ -20,55 +26,62 @@ export abstract class ModalController {
 }
 
 class Editing extends ModalController {
-    private static INSTANCE = new Editing();
+    noSelection: NoSelection;
 
-    static instance(player: Player): ModalController {
-        viewState.selectedPlayer.set(player);
-        viewState.showFollowingSelectors.set(true);
-        return Editing.INSTANCE;
+    startEditing(player: Player): ModalController {
+        this.viewState.selectedPlayer.set(player);
+        this.viewState.showFollowingSelectors.set(true);
+        return this;
     }
 
     clickBackground(): ModalController {
-        viewState.selectedPlayer.set(null);
-        viewState.showFollowingSelectors.set(false);
-        return NoSelection.instance();
+        this.viewState.selectedPlayer.set(null);
+        this.viewState.showFollowingSelectors.set(false);
+        return this.noSelection;
     }
 
     click(player: Player): ModalController {
-        viewState.selectedPlayer.set(player);
-        return Editing.instance(player);
+        this.viewState.selectedPlayer.set(player);
+        return this.noSelection;
     }
 
     clickFollowing(followingIndex: number, player: Player): ModalController {
-        viewState.selectedFollowing(followingIndex, player);
+        this.viewState.selectedFollowing(followingIndex, player);
         return this;
     }
 }
 
 class NoSelection extends ModalController {
-    private static INSTANCE = new NoSelection();
-
-    static instance(): ModalController {
-        return NoSelection.INSTANCE;
-    }
+    editing: Editing;
 
     click(player: Player): ModalController {
-        return Editing.instance(player);
+        return this.editing.startEditing(player);
     }
 
     mouseOver(player: Player): ModalController {
-        viewState.selectedPlayer.set(player);
+        this.viewState.selectedPlayer.set(player);
         return this;
     }
 
     mouseOut(player: Player): ModalController {
-        viewState.selectedPlayer.set(null);
+        this.viewState.selectedPlayer.set(null);
         return this;
     }
 }
 
 export class EditController extends ModalController {
-    private controller: ModalController = NoSelection.instance();
+    private controller: ModalController;
+
+    constructor(viewState: ViewState) {
+        super(viewState);
+
+        let noSelection = new NoSelection(viewState);
+        let editing = new Editing(viewState);
+        editing.noSelection = noSelection;
+        noSelection.editing = editing;
+
+        this.controller = noSelection;
+    }
 
     clickBackground(): ModalController {
         return this.controller = this.controller.clickBackground();

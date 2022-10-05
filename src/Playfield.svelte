@@ -3,10 +3,12 @@
     import type { ModalController } from "./controller";
     import { Dimensions, StateDisplay } from "./model.js";
     import SvgPlayer from "./SvgPlayer.svelte";
+    import type { ViewState } from "./view";
 
     export let state: StateDisplay;
     export let id: string;
     export let controller: ModalController;
+    export let viewState: ViewState;
 
     const [dimensions, viewBox, players] = [
         state.dimensions,
@@ -61,13 +63,29 @@
             on:click={() => controller.clickBackground()}
         />
         {#each $players as player}
-            <SvgPlayer displayMode="targets" {player} {controller} />
+            <SvgPlayer
+                displayMode="targets"
+                {player}
+                {controller}
+                {viewState}
+            />
         {/each}
         {#each $players as player}
-            <SvgPlayer displayMode="selection" {player} {controller} />
+            <SvgPlayer
+                displayMode="selection"
+                {player}
+                {controller}
+                {viewState}
+            />
         {/each}
         {#each $players as player}
-            <SvgPlayer displayMode="player" {player} {controller} {zoom} />
+            <SvgPlayer
+                displayMode="player"
+                {player}
+                {controller}
+                {viewState}
+                {zoom}
+            />
         {/each}
     </svg>
 </div>

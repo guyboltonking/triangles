@@ -48,11 +48,12 @@ export class EditingState {
     }
 
     add(position: Position) {
-        // TODO
+        this.startEditing(this.state.addPlayer(position));
     }
 
     delete(player: Player) {
-        // TODO
+        this.state.deletePlayer(player.id);
+        this.selectedPlayer.set(null);
     }
 
 }

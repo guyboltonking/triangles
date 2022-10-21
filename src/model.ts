@@ -30,9 +30,9 @@ export class Player {
         return this.target != null && this.position != this.target;
     }
 
-    constructor(state: State, following: [PlayerId, PlayerId]) {
+    constructor(state: State, position: Position) {
         this.state = state;
-        this._following = following;
+        this.position = position;
     }
 }
 
@@ -219,6 +219,16 @@ export class StateDisplay {
         this.updatePlayers();
     }
 
+    addPlayer(position: Position): Player {
+        let player = this.state.addPlayer(position);
+        this.updatePlayerStores();
+        return player;
+    }
+
+    deletePlayer(playerId: number) {
+        // TODO
+    }
+
     finished: Readable<boolean> = derived(this.playerStores, players =>
         players.every(player => !player.isMoving()));
 
@@ -279,13 +289,6 @@ const SIN60 = Math.sin(Math.PI / 3);
 class State {
     players: Player[] = [];
     boundingBox: BoundingBox;
-
-    addPlayer(following0: PlayerId, following1: PlayerId, x: number, y: number) {
-        let player = new Player(this, [following0, following1]);
-        player.id = this.players.length;
-        player.position = new Position(x, y);
-        this.players.push(player);
-    }
 
     // Return a tuple of [preferred-target, other-target]
     private static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
@@ -361,21 +364,36 @@ class State {
         this.calculateNewPositions(this.boundingBox);
     }
 
-    follow(playerId: number, followingIndex: number, followingPlayerId: number) {
-        this.players[playerId].follow(followingIndex, followingPlayerId);
-        this.calculateNewTargets(null);
+    addPlayer(position: Position): Player {
+        let player = new Player(this, position);
+        player.id = this.players.length;
+        this.players.push(player);
+        return player;
     }
+
+    follow(playerId: number, followingIndex: number, followingPlayerId: number, update = true) {
+        this.players[playerId].follow(followingIndex, followingPlayerId);
+        if (update) {
+            this.calculateNewTargets(null);
+        }
+    }
+}
+
+function addPlayer(state: State, following0: PlayerId, following1: PlayerId, x: number, y: number) {
+    let player = state.addPlayer(new Position(x, y));
+    state.follow(player.id, 0, following0, false);
+    state.follow(player.id, 1, following1, false);
 }
 
 export function createStateDisplay(): StateDisplay {
     let state = new State();
 
-    state.addPlayer(1, 2, 1000 / 2, 1000 / 2);
-    state.addPlayer(0, 2, 2000 / 2, 1000 / 2);
-    state.addPlayer(1, 3, 1000 / 2, 2000 / 2);
-    state.addPlayer(0, 4, 3000 / 2, 2000 / 2);
-    state.addPlayer(3, 2, 1000 / 2, 2000 / 2);
-    state.addPlayer(4, 3, 1000 / 2, 2000 / 2);
+    addPlayer(state, 1, 2, 1000 / 2, 1000 / 2);
+    addPlayer(state, 0, 2, 2000 / 2, 1000 / 2);
+    addPlayer(state, 1, 3, 1000 / 2, 2000 / 2);
+    addPlayer(state, 0, 4, 3000 / 2, 2000 / 2);
+    addPlayer(state, 3, 2, 1000 / 2, 2000 / 2);
+    addPlayer(state, 4, 3, 1000 / 2, 2000 / 2);
 
     return new StateDisplay(state);
 }

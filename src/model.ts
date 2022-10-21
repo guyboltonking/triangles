@@ -176,6 +176,10 @@ export class StateDisplay {
     private players_: Writable<Readable<Player>[]> = writable(this.playerStores);
     players: Readable<Readable<Player>[]> = this.players_;
 
+    finished: Readable<boolean> = derived(this.anyPlayerChangedStore, () =>
+        this.state.players.every(player => !player.isMoving())
+    );
+
     private updatePlayerStores() {
         // playerStores length will always be <= players length i.e. we can only
         // grow
@@ -183,6 +187,7 @@ export class StateDisplay {
             this.playerStores.push(writable(this.state.players[i]));
         }
         this.players_.set(this.playerStores);
+        this.anyPlayerChangedStore.trigger();
     }
 
     private updatePlayers() {
@@ -228,9 +233,6 @@ export class StateDisplay {
     deletePlayer(playerId: number) {
         // TODO
     }
-
-    finished: Readable<boolean> = derived(this.playerStores, players =>
-        players.every(player => !player.isMoving()));
 
     private static calculateViewBox(
         dimensions: Dimensions,

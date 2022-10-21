@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { ModalController } from "./controller";
-    import { Dimensions, StateDisplay } from "./model.js";
+    import { Dimensions, Position, StateDisplay } from "./model.js";
     import SvgPlayer from "./SvgPlayer.svelte";
     import type { EditingState } from "./view";
 
@@ -19,7 +19,7 @@
     let zoom: number;
     $: zoom = $viewBox.zoom;
 
-    let display;
+    let display: Element;
 
     // bind:clientWidth/Height is unreliable; use ResizeObserver (because I
     // don't care about old browsers)
@@ -35,10 +35,24 @@
 
         return () => resizeObserver.unobserve(display);
     });
+
+    let svg: SVGSVGElement;
+
+    function clickEventToSvgCoords(event: MouseEvent): Position {
+        let domPoint = new DOMPoint();
+        domPoint.x = event.clientX;
+        domPoint.y = event.clientY;
+
+        let svgPoint = domPoint.matrixTransform(svg.getScreenCTM().inverse());
+        return new Position(svgPoint.x, svgPoint.y);
+    }
 </script>
 
 <div {id} bind:this={display}>
-    <svg viewBox="{$viewBox.x} {$viewBox.y} {$viewBox.width} {$viewBox.height}">
+    <svg
+        bind:this={svg}
+        viewBox="{$viewBox.x} {$viewBox.y} {$viewBox.width} {$viewBox.height}"
+    >
         <defs>
             <pattern
                 id="grid"
@@ -60,7 +74,8 @@
             width={$viewBox.width}
             height={$viewBox.height}
             fill="url(#grid)"
-            on:click={() => controller.clickBackground()}
+            on:click={(evt) =>
+                controller.clickBackground(clickEventToSvgCoords(evt))}
         />
         {#each $players as player}
             <SvgPlayer

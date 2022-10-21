@@ -15,7 +15,7 @@ export abstract class ModalController {
     setMode(editorMode: EditorMode): ModalController {
         return this;
     }
-    clickBackground(): ModalController {
+    clickBackground(position: Position): ModalController {
         return this;
     }
     click(player: Player): ModalController {
@@ -81,7 +81,7 @@ class Editing extends ControllerWithEditors {
         }
     }
 
-    clickBackground(): ModalController {
+    clickBackground(position: Position): ModalController {
         this.editingState.stopEditing();
         return this.editors.noSelection;
     }
@@ -128,9 +128,9 @@ class AddingEditing extends Editing {
         }
     }
 
-    clickBackground(/* TODO position */): ModalController {
+    clickBackground(position: Position): ModalController {
         this.editingState.stopEditing();
-        this.editingState.add(new Position(0, 0));
+        this.editingState.add(position);
         return this;
     }
 }
@@ -152,8 +152,8 @@ class AddingNoSelection extends NoSelection {
         return this.editors.addingEditing;
     }
 
-    clickBackground(/* TODO position */): ModalController {
-        return this.editors.addingEditing.clickBackground();
+    clickBackground(position: Position): ModalController {
+        return this.editors.addingEditing.clickBackground(position);
     }
 }
 
@@ -187,8 +187,8 @@ export class EditController extends ModalController {
         return this;
     }
 
-    clickBackground(): ModalController {
-        this.controller = this.controller.clickBackground();
+    clickBackground(position: Position): ModalController {
+        this.controller = this.controller.clickBackground(position);
         return this;
     }
 

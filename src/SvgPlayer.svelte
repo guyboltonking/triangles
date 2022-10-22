@@ -110,7 +110,7 @@
             {/if}
         </g>
     {/if}
-{:else if displayMode == "player"}
+{:else if displayMode == "player" && $player.isNotDeleted()}
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <g
         pointer-events="all"

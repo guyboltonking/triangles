@@ -10,6 +10,7 @@ export class Player {
     position: Position;
     target: Position = null;
     speed: number = 1;
+    private deleted: boolean = false;
 
     get following(): [Player, Player] {
         return this._following.map(id =>
@@ -22,12 +23,28 @@ export class Player {
         }
     }
 
+    stopFollowing(playerId: number): void {
+        for (let followingIndex in this._following) {
+            if (this._following[followingIndex] == playerId) {
+                this._following[followingIndex] = NO_PLAYER;
+            }
+        }
+    }
+
+    delete() {
+        this.deleted = true;
+    }
+
     isFollowing(): boolean {
-        return this._following.every(id => id != NO_PLAYER);
+        return this.isNotDeleted() && this._following.every(id => id != NO_PLAYER);
     }
 
     isMoving(): boolean {
-        return this.target != null && this.position != this.target;
+        return this.isNotDeleted() && this.target != null && this.position != this.target;
+    }
+
+    isNotDeleted(): boolean {
+        return !this.deleted;
     }
 
     constructor(state: State, position: Position) {
@@ -231,7 +248,8 @@ export class StateDisplay {
     }
 
     deletePlayer(playerId: number) {
-        // TODO
+        this.state.deletePlayer(playerId);
+        this.updatePlayerStores();
     }
 
     private static calculateViewBox(
@@ -356,7 +374,9 @@ class State {
                     player.position = player.target;
                 }
             }
-            boundingBox?.expand(player.position);
+            if (player.isNotDeleted()) {
+                boundingBox?.expand(player.position);
+            }
         }
     }
 
@@ -371,6 +391,11 @@ class State {
         player.id = this.players.length;
         this.players.push(player);
         return player;
+    }
+
+    deletePlayer(playerId: number) {
+        this.players[playerId].delete();
+        this.players.forEach(player => player.stopFollowing(playerId));
     }
 
     follow(playerId: number, followingIndex: number, followingPlayerId: number, update = true) {

@@ -47,6 +47,10 @@ export class EditingState {
         });
     }
 
+    setPosition(player: Player, position: Position) {
+        this.state.setPosition(player.id, position)
+    }
+
     add(position: Position) {
         this.startEditing(this.state.addPlayer(position));
     }

@@ -102,7 +102,7 @@ class Editing extends ControllerWithEditors {
     }
 
     drag(player: Player, position: Position) {
-        console.log(`${player.id} drag`)
+        this.editingState.setPosition(player, position);
         return this;
     }
 }

@@ -252,6 +252,11 @@ export class StateDisplay {
         this.updatePlayerStores();
     }
 
+    setPosition(playerId: number, position: Position) {
+        this.state.setPosition(playerId, position);
+        this.updatePlayers();
+    }
+
     private static calculateViewBox(
         dimensions: Dimensions,
         margin: number,
@@ -396,6 +401,11 @@ class State {
     deletePlayer(playerId: number) {
         this.players[playerId].delete();
         this.players.forEach(player => player.stopFollowing(playerId));
+    }
+
+    setPosition(playerId: number, position: Position) {
+        this.players[playerId].position = position;
+        this.calculateNewTargets(null);
     }
 
     follow(playerId: number, followingIndex: number, followingPlayerId: number, update = true) {

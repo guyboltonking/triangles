@@ -117,6 +117,7 @@
         constantly resized svg. */
         flex: 1 1 0;
         border: solid black 1px;
+        /* Prevent text selection */
         user-select: none;
     }
 </style>

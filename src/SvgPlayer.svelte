@@ -112,6 +112,8 @@
     {/if}
 {:else if displayMode == "player" && $player.isNotDeleted()}
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <!-- TODO: disable event handling when any player is being dragged; maybe via something like a readable on editingState, like canBeSelected?
+    -->
     <g
         pointer-events="all"
         on:mouseover={() => controller.mouseOver($player)}

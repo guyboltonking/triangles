@@ -117,7 +117,7 @@
         on:mouseover={() => controller.mouseOver($player)}
         on:mouseout={() => controller.mouseOut($player)}
         on:mousedown={() => controller.mouseDown($player)}
-        on:mousemove={() => controller.mouseMove($player, null)}
+        on:mousemove={(event) => controller.mouseMove($player, event)}
         on:mouseup={() => controller.mouseUp($player)}
         class="player {selectedClass}"
     >

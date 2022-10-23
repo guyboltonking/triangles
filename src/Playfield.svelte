@@ -38,7 +38,7 @@
 
     let svg: SVGSVGElement;
 
-    function clickEventToSvgCoords(event: MouseEvent): Position {
+    function domPositionToModelPosition(event: MouseEvent): Position {
         let domPoint = new DOMPoint();
         domPoint.x = event.clientX;
         domPoint.y = event.clientY;
@@ -46,6 +46,8 @@
         let svgPoint = domPoint.matrixTransform(svg.getScreenCTM().inverse());
         return new Position(svgPoint.x, svgPoint.y);
     }
+
+    controller.setDomPositionToModelPosition(domPositionToModelPosition);
 </script>
 
 <div {id} bind:this={display}>
@@ -74,8 +76,7 @@
             width={$viewBox.width}
             height={$viewBox.height}
             fill="url(#grid)"
-            on:click={(evt) =>
-                controller.clickBackground(clickEventToSvgCoords(evt))}
+            on:click={(event) => controller.clickBackground(event)}
         />
         {#each $players as player}
             <SvgPlayer

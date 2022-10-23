@@ -268,18 +268,24 @@ class DragAdaptor {
 export class EditController {
     private dragEditController: DragEditController;
     private dragAdaptor: DragAdaptor;
+    private domPositionToModelPosition: (event: MouseEvent) => Position;
 
     constructor(editingState: EditingState) {
         this.dragEditController = new DragEditController(editingState);
         this.dragAdaptor = new DragAdaptor(this.dragEditController);
     }
 
+    // Urgh, two-phase construction
+    setDomPositionToModelPosition(domPositionToModelPosition: (event: MouseEvent) => Position) {
+        this.domPositionToModelPosition = domPositionToModelPosition;
+    }
+
     setMode(editorMode: EditorMode) {
         this.dragEditController.setMode(editorMode);
     }
 
-    clickBackground(position: Position) {
-        this.dragEditController.clickBackground(position);
+    clickBackground(event: MouseEvent) {
+        this.dragEditController.clickBackground(this.domPositionToModelPosition(event));
     }
 
     click(player: Player) {
@@ -306,7 +312,7 @@ export class EditController {
         this.dragAdaptor.mouseUp(player);
     }
 
-    mouseMove(player: Player, position: Position) {
-        this.dragAdaptor.mouseMove(player, position);
+    mouseMove(player: Player, event: MouseEvent) {
+        this.dragAdaptor.mouseMove(player, this.domPositionToModelPosition(event));
     }
 }

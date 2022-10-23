@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { EditController, ModalController } from "./controller.js";
+  import { EditController } from "./controller.js";
   import { createStateDisplay, ZoomMode } from "./model.js";
   import PlayerEditor from "./PlayerEditor.svelte";
   import Playfield from "./Playfield.svelte";
@@ -15,7 +15,7 @@
   let state = createStateDisplay();
   let editingState = new EditingState(state);
 
-  let controller: ModalController = new EditController(editingState);
+  let controller: EditController = new EditController(editingState);
 
   const [finished, zoomMode, viewBox] = [
     state.finished,

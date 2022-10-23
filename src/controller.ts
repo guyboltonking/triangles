@@ -5,7 +5,7 @@ export enum EditorMode {
     EDIT, ADD, DELETE
 };
 
-export abstract class ModalController {
+abstract class ModalController {
     protected editingState: EditingState;
 
     constructor(editingState: EditingState) {
@@ -30,63 +30,12 @@ export abstract class ModalController {
     mouseOut(player: Player): ModalController {
         return this;
     }
-    mouseDown(player: Player): ModalController {
-        return this;
-    }
-    mouseUp(player: Player): ModalController {
-        return this;
-    }
-    mouseMove(player: Player, position: Position): ModalController {
-        return this;
-    }
     drag(player: Player, position: Position): ModalController {
         return this;
     }
 }
 
 
-enum DragState {
-    NONE, MOUSEDOWN, DRAGGING
-}
-
-abstract class DragInterpretingController extends ModalController {
-    private dragState: DragState = DragState.NONE;
-    private draggedPlayerId: number = NO_PLAYER;
-
-    mouseDown(player: Player): ModalController {
-        this.dragState = DragState.MOUSEDOWN;
-        this.draggedPlayerId = player.id;
-        return this;
-    }
-
-    mouseUp(player: Player): ModalController {
-        var result: ModalController = this;
-
-        if (this.dragState == DragState.MOUSEDOWN && this.draggedPlayerId == player.id) {
-            result = this.click(player);
-        }
-
-        this.dragState = DragState.NONE;
-        this.draggedPlayerId = NO_PLAYER;
-
-        return result;
-    }
-
-    mouseMove(player: Player, position: Position): ModalController {
-        if (this.draggedPlayerId == player.id &&
-            (this.dragState == DragState.MOUSEDOWN ||
-                this.dragState == DragState.DRAGGING)) {
-            this.dragState = DragState.DRAGGING;
-            return this.drag(player, position);
-        }
-
-        this.dragState = DragState.NONE;
-        this.draggedPlayerId = NO_PLAYER;
-
-        return this;
-    }
-
-}
 
 abstract class ControllerWithEditors extends ModalController {
     protected editors: Editors;
@@ -226,12 +175,10 @@ class Editors {
     deleting: Deleting;
 }
 
-export class EditController extends DragInterpretingController {
+class DragEditController implements DragEventSink {
     private controller: ModalController;
 
     constructor(editingState: EditingState) {
-        super(editingState);
-
         let editors: Editors = new Editors();
 
         editors.noSelection = new NoSelection(editingState, editors);
@@ -243,38 +190,123 @@ export class EditController extends DragInterpretingController {
         this.controller = editors.noSelection;
     }
 
-    setMode(editorMode: EditorMode): ModalController {
+    setMode(editorMode: EditorMode) {
         this.controller = this.controller.setMode(editorMode);
-        return this;
     }
 
-    clickBackground(position: Position): ModalController {
+    clickBackground(position: Position) {
         this.controller = this.controller.clickBackground(position);
-        return this;
     }
 
-    click(player: Player): ModalController {
+    click(player: Player) {
         this.controller = this.controller.click(player);
-        return this;
     }
 
-    clickFollowing(followingIndex: number, player: Player): ModalController {
+    clickFollowing(followingIndex: number, player: Player) {
         this.controller = this.controller.clickFollowing(followingIndex, player);
-        return this;
     }
 
-    mouseOver(player: Player): ModalController {
+    mouseOver(player: Player) {
         this.controller = this.controller.mouseOver(player);
-        return this;
     }
 
-    mouseOut(player: Player): ModalController {
+    mouseOut(player: Player) {
         this.controller = this.controller.mouseOut(player);
-        return this;
     }
 
     drag(player: Player, position: Position) {
         this.controller = this.controller.drag(player, position);
-        return this;
+    }
+}
+
+enum DragState {
+    NONE, MOUSEDOWN, DRAGGING
+}
+
+interface DragEventSink {
+    click(player: Player): void;
+    drag(player: Player, position: Position): void;
+}
+
+class DragAdaptor {
+    private dragState: DragState = DragState.NONE;
+    private draggedPlayerId: number = NO_PLAYER;
+    private dragEventSink: DragEventSink;
+
+    constructor(dragEventSink: DragEventSink) {
+        this.dragEventSink = dragEventSink;
+    }
+
+    mouseDown(player: Player) {
+        this.dragState = DragState.MOUSEDOWN;
+        this.draggedPlayerId = player.id;
+    }
+
+    mouseUp(player: Player) {
+        if (this.dragState == DragState.MOUSEDOWN && this.draggedPlayerId == player.id) {
+            this.dragEventSink.click(player);
+        }
+
+        this.dragState = DragState.NONE;
+        this.draggedPlayerId = NO_PLAYER;
+    }
+
+    mouseMove(player: Player, position: Position) {
+        if (this.draggedPlayerId == player.id &&
+            (this.dragState == DragState.MOUSEDOWN ||
+                this.dragState == DragState.DRAGGING)) {
+            this.dragState = DragState.DRAGGING;
+            this.dragEventSink.drag(player, position);
+        }
+        else {
+            this.dragState = DragState.NONE;
+            this.draggedPlayerId = NO_PLAYER;
+        }
+    }
+}
+
+export class EditController {
+    private dragEditController: DragEditController;
+    private dragAdaptor: DragAdaptor;
+
+    constructor(editingState: EditingState) {
+        this.dragEditController = new DragEditController(editingState);
+        this.dragAdaptor = new DragAdaptor(this.dragEditController);
+    }
+
+    setMode(editorMode: EditorMode) {
+        this.dragEditController.setMode(editorMode);
+    }
+
+    clickBackground(position: Position) {
+        this.dragEditController.clickBackground(position);
+    }
+
+    click(player: Player) {
+        this.dragEditController.click(player);
+    }
+
+    clickFollowing(followingIndex: number, player: Player) {
+        this.dragEditController.clickFollowing(followingIndex, player);
+    }
+
+    mouseOver(player: Player) {
+        this.dragEditController.mouseOver(player);
+    }
+
+    mouseOut(player: Player) {
+        this.dragEditController.mouseOut(player);
+    }
+
+    mouseDown(player: Player) {
+        this.dragAdaptor.mouseDown(player);
+    }
+
+    mouseUp(player: Player) {
+        this.dragAdaptor.mouseUp(player);
+    }
+
+    mouseMove(player: Player, position: Position) {
+        this.dragAdaptor.mouseMove(player, position);
     }
 }

@@ -2,14 +2,14 @@
 
 <script lang="ts">
     import { readable, type Readable } from "svelte/store";
-    import type { ModalController } from "./controller.js";
+    import type { EditController } from "./controller.js";
     import { Player, Vector } from "./model.js";
     import type { EditingState } from "./view.js";
 
     const arrowWidth = 6;
 
     export let player: Readable<Player> = null;
-    export let controller: ModalController = null;
+    export let controller: EditController = null;
     export let editingState: EditingState = null;
 
     let showFollowingSelectors = editingState?.showFollowingSelectors;

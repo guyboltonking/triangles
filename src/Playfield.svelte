@@ -1,13 +1,13 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { ModalController } from "./controller";
+    import type { EditController } from "./controller";
     import { Dimensions, Position, StateDisplay } from "./model.js";
     import SvgPlayer from "./SvgPlayer.svelte";
     import type { EditingState } from "./view";
 
     export let state: StateDisplay;
     export let id: string;
-    export let controller: ModalController;
+    export let controller: EditController;
     export let editingState: EditingState;
 
     const [dimensions, viewBox, players] = [

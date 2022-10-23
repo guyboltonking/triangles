@@ -1,7 +1,7 @@
 import { derived, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
 
 type PlayerId = number;
-const NO_PLAYER: PlayerId = -1;
+export const NO_PLAYER: PlayerId = -1;
 
 export class Player {
     id: number;

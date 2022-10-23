@@ -1,4 +1,4 @@
-import { Position, type Player } from "./model";
+import { NO_PLAYER, Position, type Player } from "./model";
 import type { EditingState } from "./view";
 
 export enum EditorMode {
@@ -30,6 +30,62 @@ export abstract class ModalController {
     mouseOut(player: Player): ModalController {
         return this;
     }
+    mouseDown(player: Player): ModalController {
+        return this;
+    }
+    mouseUp(player: Player): ModalController {
+        return this;
+    }
+    mouseMove(player: Player, position: Position): ModalController {
+        return this;
+    }
+    drag(player: Player, position: Position): ModalController {
+        return this;
+    }
+}
+
+
+enum DragState {
+    NONE, MOUSEDOWN, DRAGGING
+}
+
+abstract class DragInterpretingController extends ModalController {
+    private dragState: DragState = DragState.NONE;
+    private draggedPlayerId: number = NO_PLAYER;
+
+    mouseDown(player: Player): ModalController {
+        this.dragState = DragState.MOUSEDOWN;
+        this.draggedPlayerId = player.id;
+        return this;
+    }
+
+    mouseUp(player: Player): ModalController {
+        var result: ModalController = this;
+
+        if (this.dragState == DragState.MOUSEDOWN && this.draggedPlayerId == player.id) {
+            result = this.click(player);
+        }
+
+        this.dragState = DragState.NONE;
+        this.draggedPlayerId = NO_PLAYER;
+
+        return result;
+    }
+
+    mouseMove(player: Player, position: Position): ModalController {
+        if (this.draggedPlayerId == player.id &&
+            (this.dragState == DragState.MOUSEDOWN ||
+                this.dragState == DragState.DRAGGING)) {
+            this.dragState = DragState.DRAGGING;
+            return this.drag(player, position);
+        }
+
+        this.dragState = DragState.NONE;
+        this.draggedPlayerId = NO_PLAYER;
+
+        return this;
+    }
+
 }
 
 abstract class ControllerWithEditors extends ModalController {
@@ -93,6 +149,11 @@ class Editing extends ControllerWithEditors {
 
     clickFollowing(followingIndex: number, player: Player): ModalController {
         this.editingState.selectedFollowing(followingIndex, player);
+        return this;
+    }
+
+    drag(player: Player, position: Position) {
+        console.log(`${player.id} drag`)
         return this;
     }
 }
@@ -165,7 +226,7 @@ class Editors {
     deleting: Deleting;
 }
 
-export class EditController extends ModalController {
+export class EditController extends DragInterpretingController {
     private controller: ModalController;
 
     constructor(editingState: EditingState) {
@@ -209,6 +270,11 @@ export class EditController extends ModalController {
 
     mouseOut(player: Player): ModalController {
         this.controller = this.controller.mouseOut(player);
+        return this;
+    }
+
+    drag(player: Player, position: Position) {
+        this.controller = this.controller.drag(player, position);
         return this;
     }
 }

@@ -114,9 +114,11 @@
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <g
         pointer-events="all"
-        on:click={() => controller.click($player)}
         on:mouseover={() => controller.mouseOver($player)}
         on:mouseout={() => controller.mouseOut($player)}
+        on:mousedown={() => controller.mouseDown($player)}
+        on:mousemove={() => controller.mouseMove($player, null)}
+        on:mouseup={() => controller.mouseUp($player)}
         class="player {selectedClass}"
     >
         <circle

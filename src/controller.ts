@@ -97,7 +97,7 @@ class Editing extends ControllerWithEditors {
     }
 
     clickFollowing(followingIndex: number, player: Player): ModalController {
-        this.editingState.selectedFollowing(followingIndex, player);
+        this.editingState.setSelectedIsFollowing(followingIndex, player);
         return this;
     }
 

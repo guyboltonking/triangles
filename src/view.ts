@@ -38,7 +38,7 @@ export class EditingState {
         );
     }
 
-    selectedFollowing(followingIndex: number, followedPlayer: Player) {
+    setSelectedIsFollowing(followingIndex: number, followedPlayer: Player) {
         this.selectedPlayer.update(selectedPlayer => {
             if (selectedPlayer) {
                 this.state.follow(selectedPlayer.id, followingIndex, followedPlayer.id);

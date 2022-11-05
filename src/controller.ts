@@ -30,7 +30,13 @@ abstract class ModalController {
     mouseOut(player: Player): ModalController {
         return this;
     }
+    startDragging(player: Player): ModalController {
+        return this;
+    }
     drag(player: Player, position: Position): ModalController {
+        return this;
+    }
+    stopDragging(player: Player): ModalController {
         return this;
     }
 }
@@ -71,6 +77,10 @@ class NoSelection extends ControllerWithEditors {
         this.editingState.selectedPlayer.set(null);
         return this;
     }
+
+    startDragging(player: Player): ModalController {
+        return this.editors.editing.startDragging(player);
+    }
 }
 
 class Editing extends ControllerWithEditors {
@@ -101,8 +111,19 @@ class Editing extends ControllerWithEditors {
         return this;
     }
 
-    drag(player: Player, position: Position) {
+    startDragging(player: Player): ModalController {
+        this.editingState.startEditing(player);
+        this.editingState.startDragging();
+        return this;
+    }
+
+    drag(player: Player, position: Position): ModalController {
         this.editingState.setPosition(player, position);
+        return this;
+    }
+
+    stopDragging(player: Player): ModalController {
+        this.editingState.stopDragging();
         return this;
     }
 }
@@ -214,8 +235,16 @@ class DragEditController implements DragEventSink {
         this.controller = this.controller.mouseOut(player);
     }
 
+    startDragging(player: Player) {
+        this.controller = this.controller.startDragging(player);
+    }
+
     drag(player: Player, position: Position) {
         this.controller = this.controller.drag(player, position);
+    }
+
+    stopDragging(player: Player) {
+        this.controller = this.controller.stopDragging(player);
     }
 }
 
@@ -225,7 +254,9 @@ enum DragState {
 
 interface DragEventSink {
     click(player: Player): void;
+    startDragging(player: Player): void;
     drag(player: Player, position: Position): void;
+    stopDragging(player: Player): void;
 }
 
 class DragAdaptor {
@@ -247,6 +278,10 @@ class DragAdaptor {
             this.dragEventSink.click(player);
         }
 
+        if (this.dragState == DragState.DRAGGING && this.draggedPlayerId == player.id) {
+            this.dragEventSink.stopDragging(player);
+        }
+
         this.dragState = DragState.NONE;
         this.draggedPlayerId = NO_PLAYER;
     }
@@ -255,7 +290,12 @@ class DragAdaptor {
         if (this.draggedPlayerId == player.id &&
             (this.dragState == DragState.MOUSEDOWN ||
                 this.dragState == DragState.DRAGGING)) {
-            this.dragState = DragState.DRAGGING;
+
+            if (this.dragState != DragState.DRAGGING) {
+                this.dragEventSink.startDragging(player);
+                this.dragState = DragState.DRAGGING;
+            }
+
             this.dragEventSink.drag(player, position);
         }
         else {

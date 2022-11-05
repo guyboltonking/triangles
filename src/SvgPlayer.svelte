@@ -15,11 +15,14 @@
     let showFollowingSelectors = editingState?.showFollowingSelectors;
 
     let selected: Readable<boolean> = readable(false);
+    let selectable: Readable<boolean> = readable(false);
+
     let following1: Readable<boolean> = readable(false);
     let following2: Readable<boolean> = readable(false);
 
     if (player != null) {
         selected = editingState.isSelected($player);
+        selectable = editingState.isSelectable($player);
         following1 = editingState.selectedIsFollowing(0, $player);
         following2 = editingState.selectedIsFollowing(1, $player);
     }
@@ -38,6 +41,9 @@
             following2Class = "selectable";
         }
     }
+
+    let selectablePointerEvents;
+    $: selectablePointerEvents = $selectable ? "all" : "none";
 
     export let displayMode: string;
     export let zoom: number = 1;
@@ -115,7 +121,7 @@
     <!-- TODO: disable event handling when any player is being dragged; maybe via something like a readable on editingState, like canBeSelected?
     -->
     <g
-        pointer-events="all"
+        pointer-events={selectablePointerEvents}
         on:mouseover={() => controller.mouseOver($player)}
         on:mouseout={() => controller.mouseOut($player)}
         on:mousedown={() => controller.mouseDown($player)}
@@ -142,7 +148,7 @@
     </g>
     {#if $showFollowingSelectors && !$selected}
         <circle
-            pointer-events="all"
+            pointer-events={selectablePointerEvents}
             on:click={() => controller.clickFollowing(0, $player)}
             class="following {following1Class}"
             cx={$player.position.x + FOLLOWING_SELECTOR_OFFSET / zoom}
@@ -151,7 +157,7 @@
             stroke-width={Math.min(1, 1 / zoom)}
         />
         <circle
-            pointer-events="all"
+            pointer-events={selectablePointerEvents}
             on:click={() => controller.clickFollowing(1, $player)}
             class="following {following2Class}"
             cx={$player.position.x - FOLLOWING_SELECTOR_OFFSET / zoom}

@@ -5,6 +5,7 @@ export class EditingState {
     private state: StateDisplay;
     selectedPlayer: Writable<Player> = writable(null);
     showFollowingSelectors: Writable<boolean> = writable(false);
+    private dragging: Writable<boolean> = writable(false);
 
     constructor(state: StateDisplay) {
         this.state = state;
@@ -20,6 +21,14 @@ export class EditingState {
         this.showFollowingSelectors.set(false);
     }
 
+    startDragging() {
+        this.dragging.set(true);
+    }
+
+    stopDragging() {
+        this.dragging.set(false);
+    }
+
     highlight(player: Player) {
         this.selectedPlayer.set(player);
     }
@@ -28,6 +37,14 @@ export class EditingState {
         return derived(
             this.selectedPlayer,
             highlightedPlayer => player == highlightedPlayer
+        );
+    }
+
+    isSelectable(player: Player): Readable<boolean> {
+        return derived(
+            [this.selectedPlayer, this.dragging],
+            ([selectedPlayer, dragging]) =>
+                !dragging || player == selectedPlayer
         );
     }
 

@@ -249,7 +249,7 @@ export class StateDisplay {
 
     deletePlayer(playerId: number) {
         this.state.deletePlayer(playerId);
-        this.updatePlayerStores();
+        this.updatePlayers();
     }
 
     setPosition(playerId: number, position: Position) {

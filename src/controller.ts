@@ -144,6 +144,11 @@ class Deleting extends NoSelection {
         this.editingState.delete(player);
         return this;
     }
+
+    // Block dragging from starting
+    startDragging(player: Player): ModalController {
+        return this;
+    }
 }
 
 class AddingEditing extends Editing {

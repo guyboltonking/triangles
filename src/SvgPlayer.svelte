@@ -16,6 +16,12 @@
 
     let position = $player.position;
 
+    let followingPosition0 = $player.followingPosition[0];
+    let followingPosition1 = $player.followingPosition[1];
+
+    let followedPlayer0 = $player.following[0];
+    let followedPlayer1 = $player.following[1];
+
     let selected = editingState.isSelected($player);
     let selectable = editingState.isSelectable($player);
     let following1 = editingState.selectedIsFollowing(0, $player);
@@ -56,10 +62,8 @@
                 class="triangle"
                 points="
     {$player.target.x},{$player.target.y}
-    {$player.following[0].position.value.x},{$player.following[0].position.value
-                    .y}
-    {$player.following[1].position.value.x},{$player.following[1].position.value
-                    .y}"
+    {$followingPosition0.x},{$followingPosition0.y},
+    {$followingPosition1.x},{$followingPosition1.y}"
                 stroke-width="2"
             />
             {#if $player.isMoving()}

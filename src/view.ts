@@ -1,5 +1,6 @@
-import { derived, writable, type Readable, type Writable } from "svelte/store";
+import { derived, writable, type Readable, type Subscriber, type Unsubscriber, type Writable } from "svelte/store";
 import type { Player, Position, StateDisplay } from "./model";
+import { Subscriptions } from "./store";
 
 export class EditingState {
     private state: StateDisplay;
@@ -49,10 +50,38 @@ export class EditingState {
     }
 
     selectedIsFollowing(followingIndex: number, player: Player): Readable<boolean> {
-        return derived(
-            this.selectedPlayer,
-            selectedPlayer => selectedPlayer?.following[followingIndex] == player
-        );
+        let selectedPlayer = this.selectedPlayer;
+
+        return new class implements Readable<boolean> {
+            private subscriptions = new Subscriptions<boolean>();
+
+            subscribe(subscriber: Subscriber<boolean>): Unsubscriber {
+                let subscriptionsUnsubscribe =
+                    this.subscriptions.subscribe(subscriber, false);
+
+                let followingUnsubscribe = () => { };
+
+                let selectedPlayerUnsubscribe =
+                    selectedPlayer.subscribe(selectedPlayer => {
+                        followingUnsubscribe();
+
+                        if (selectedPlayer == null) {
+                            this.subscriptions.notify(false);
+                        }
+                        else {
+                            followingUnsubscribe = selectedPlayer.following[followingIndex].subscribe(followedPlayer => {
+                                this.subscriptions.notify(followedPlayer == player);
+                            })
+                        }
+                    });
+
+                return () => {
+                    followingUnsubscribe();
+                    selectedPlayerUnsubscribe();
+                    subscriptionsUnsubscribe();
+                }
+            }
+        };
     }
 
     setSelectedIsFollowing(followingIndex: number, followedPlayer: Player) {

@@ -27,27 +27,67 @@ class ReadableValue<T> implements Readable<T> {
 export class Player {
     id: number;
     private state: State;
-    private _following: [PlayerId, PlayerId] = [NO_PLAYER, NO_PLAYER];
+    private _following: [ReadableValue<PlayerId>, ReadableValue<PlayerId>] = [
+        new ReadableValue(NO_PLAYER),
+        new ReadableValue(NO_PLAYER)
+    ];
     position: ReadableValue<Position>;
     target: Position = null;
     speed: number = 1;
     private deleted: boolean = false;
 
-    get following(): [Player, Player] {
+    get rawFollowing(): [Player, Player] {
         return this._following.map(id =>
-            id != NO_PLAYER ? this.state.players[id] : null) as [Player, Player];
+            id.value != NO_PLAYER ? this.state.players[id.value] : null) as [Player, Player];
     }
 
+    following: [Readable<Player>, Readable<Player>] =
+        this._following.map(idStore =>
+            derived([idStore], ([id]) =>
+                id != NO_PLAYER ? this.state.players[id] : null)
+        ) as [Readable<Player>, Readable<Player>];
+
+    followingPosition: [Readable<Position>, Readable<Position>] =
+        this.following.map(playerStore =>
+            new class implements Readable<Position> {
+                private subscriptions = new Subscriptions<Position>();
+
+                subscribe(subscriber: Subscriber<Position>) {
+                    let subscriptionsUnsubscribe = this.subscriptions.subscribe(subscriber, null);
+
+                    let positionUnsubscribe = () => { };
+
+                    let followingUnsubscribe = playerStore.subscribe(player => {
+                        positionUnsubscribe();
+                        if (player == null) {
+                            this.subscriptions.notify(null);
+                        }
+                        else {
+                            positionUnsubscribe = player.position.subscribe(position => this.subscriptions.notify(position))
+                        }
+                    })
+
+                    return () => {
+                        positionUnsubscribe()
+                        followingUnsubscribe();
+                        subscriptionsUnsubscribe();
+                    }
+                }
+
+            } as Readable<Position>
+        ) as [Readable<Position>, Readable<Position>];
+
     follow(followingIndex: number, followingPlayerId: PlayerId) {
-        if (followingPlayerId != this.id && this._following.every(id => id != followingPlayerId)) {
-            this._following[followingIndex] = followingPlayerId;
+        if (followingPlayerId != this.id &&
+            this._following.every(id => id.value != followingPlayerId)) {
+            this._following[followingIndex].set(followingPlayerId);
         }
     }
 
     stopFollowing(playerId: number): void {
         for (let followingIndex in this._following) {
-            if (this._following[followingIndex] == playerId) {
-                this._following[followingIndex] = NO_PLAYER;
+            if (this._following[followingIndex].value == playerId) {
+                this._following[followingIndex].set(NO_PLAYER);
             }
         }
     }
@@ -57,7 +97,7 @@ export class Player {
     }
 
     isFollowing(): boolean {
-        return this.isNotDeleted() && this._following.every(id => id != NO_PLAYER);
+        return this.isNotDeleted() && this._following.every(id => id.value != NO_PLAYER);
     }
 
     isMoving(): boolean {
@@ -373,8 +413,8 @@ class State {
             if (player.isFollowing()) {
                 const targets = State.calculateTargets(
                     player.position.value,
-                    player.following[0].position.value,
-                    player.following[1].position.value,
+                    player.rawFollowing[0].position.value,
+                    player.rawFollowing[1].position.value,
                 );
                 targets.forEach(target => boundingBox?.expand(target));
                 player.target = targets[0];

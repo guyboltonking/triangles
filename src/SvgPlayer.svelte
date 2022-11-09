@@ -4,9 +4,10 @@
     import { readable, type Readable } from "svelte/store";
     import type { EditController } from "./controller.js";
     import { Player, Position, Vector } from "./model.js";
+    import SvgPlayerDefs from "./SvgPlayerDefs.svelte";
     import type { EditingState } from "./view.js";
 
-    const arrowWidth = 6;
+    export let arrowWidth: number = 6;
 
     export let player: Readable<Player> = null;
     export let controller: EditController = null;
@@ -59,30 +60,7 @@
 </script>
 
 {#if displayMode == "defs"}
-    <marker
-        id="arrowhead-selected"
-        markerWidth={arrowWidth}
-        markerHeight="4"
-        refX={arrowWidth}
-        refY="2"
-        orient="auto"
-        stroke-width="0"
-        fill="red"
-    >
-        <polygon points="0 0, {arrowWidth} 2, 0 4" />
-    </marker>
-    <marker
-        id="arrowhead"
-        markerWidth={arrowWidth}
-        markerHeight="4"
-        refX={arrowWidth}
-        refY="2"
-        orient="auto"
-        stroke-width="0"
-        fill="pink"
-    >
-        <polygon points="0 0, {arrowWidth} 2, 0 4" />
-    </marker>
+    <SvgPlayerDefs {arrowWidth} />
 {:else if displayMode == "targets" || displayMode == "selection"}
     {#if $player.isFollowing()}
         <g class="target {displayMode} {selectedClass}">

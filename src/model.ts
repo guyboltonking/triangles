@@ -1,4 +1,5 @@
 import { derived, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
+import { Subscriptions } from "./store";
 
 type PlayerId = number;
 export const NO_PLAYER: PlayerId = -1;
@@ -6,8 +7,8 @@ export const NO_PLAYER: PlayerId = -1;
 /** Like a writable but with a directly accessible value that can be read
  *  without subscribing and set without triggering */
 class ReadableValue<T> implements Readable<T> {
-    private subscribers: Set<Subscriber<T>> = new Set();
-    value: T
+    private subscriptions = new Subscriptions<T>();
+    value: T;
 
     constructor(value: T) {
         this.value = value;
@@ -15,17 +16,11 @@ class ReadableValue<T> implements Readable<T> {
 
     set(value: T) {
         this.value = value;
-        this.notify();
-    }
-
-    notify() {
-        this.subscribers.forEach(subscriber => subscriber(this.value));
+        this.subscriptions.notify(this.value);
     }
 
     subscribe(subscriber: Subscriber<T>) {
-        this.subscribers.add(subscriber);
-        subscriber(this.value);
-        return () => this.subscribers.delete(subscriber);
+        return this.subscriptions.subscribe(subscriber, this.value);
     }
 }
 

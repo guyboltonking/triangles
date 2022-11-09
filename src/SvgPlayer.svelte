@@ -4,10 +4,9 @@
     import { readable, type Readable } from "svelte/store";
     import type { EditController } from "./controller.js";
     import { Player, Position, Vector } from "./model.js";
-    import SvgPlayerDefs from "./SvgPlayerDefs.svelte";
     import type { EditingState } from "./view.js";
 
-    export let arrowWidth: number = 6;
+    export let arrowWidth: number;
 
     export let player: Readable<Player> = null;
     export let controller: EditController = null;
@@ -59,9 +58,7 @@
     const FOLLOWING_HITBOX_RADIUS = 10;
 </script>
 
-{#if displayMode == "defs"}
-    <SvgPlayerDefs {arrowWidth} />
-{:else if displayMode == "targets" || displayMode == "selection"}
+{#if displayMode == "targets" || displayMode == "selection"}
     {#if $player.isFollowing()}
         <g class="target {displayMode} {selectedClass}">
             <polygon

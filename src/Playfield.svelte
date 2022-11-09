@@ -3,6 +3,7 @@
     import type { EditController } from "./controller";
     import { Dimensions, Position, StateDisplay } from "./model.js";
     import SvgPlayer from "./SvgPlayer.svelte";
+    import SvgPlayerDefs from "./SvgPlayerDefs.svelte";
     import type { EditingState } from "./view";
 
     export let state: StateDisplay;
@@ -20,6 +21,7 @@
     $: zoom = $viewBox.zoom;
 
     let display: Element;
+    let arrowWidth = 6;
 
     // bind:clientWidth/Height is unreliable; use ResizeObserver (because I
     // don't care about old browsers)
@@ -68,7 +70,7 @@
                     fill="none"
                 />
             </pattern>
-            <SvgPlayer displayMode="defs" />
+            <SvgPlayerDefs {arrowWidth} />
         </defs>
         <rect
             x={$viewBox.x}
@@ -84,6 +86,7 @@
                 {player}
                 {controller}
                 {editingState}
+                {arrowWidth}
             />
         {/each}
         {#each $players as player}
@@ -92,6 +95,7 @@
                 {player}
                 {controller}
                 {editingState}
+                {arrowWidth}
             />
         {/each}
         {#each $players as player}
@@ -100,6 +104,7 @@
                 {player}
                 {controller}
                 {editingState}
+                {arrowWidth}
                 {zoom}
             />
         {/each}

@@ -1,5 +1,5 @@
 import { derived, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
-import { Subscriptions } from "./store";
+import { extract, Subscriptions } from "./store";
 
 type PlayerId = number;
 export const NO_PLAYER: PlayerId = -1;
@@ -49,32 +49,7 @@ export class Player {
 
     followingPosition: [Readable<Position>, Readable<Position>] =
         this.following.map(playerStore =>
-            new class implements Readable<Position> {
-                private subscriptions = new Subscriptions<Position>();
-
-                subscribe(subscriber: Subscriber<Position>) {
-                    let subscriptionsUnsubscribe = this.subscriptions.subscribe(subscriber, null);
-
-                    let positionUnsubscribe = () => { };
-
-                    let followingUnsubscribe = playerStore.subscribe(player => {
-                        positionUnsubscribe();
-                        if (player == null) {
-                            this.subscriptions.notify(null);
-                        }
-                        else {
-                            positionUnsubscribe = player.position.subscribe(position => this.subscriptions.notify(position))
-                        }
-                    })
-
-                    return () => {
-                        positionUnsubscribe()
-                        followingUnsubscribe();
-                        subscriptionsUnsubscribe();
-                    }
-                }
-
-            } as Readable<Position>
+            extract(playerStore, null, player => player.position, position => position)
         ) as [Readable<Position>, Readable<Position>];
 
     follow(followingIndex: number, followingPlayerId: PlayerId) {

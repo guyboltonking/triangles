@@ -1,6 +1,6 @@
 import { derived, writable, type Readable, type Subscriber, type Unsubscriber, type Writable } from "svelte/store";
 import type { Player, Position, StateDisplay } from "./model";
-import { Subscriptions } from "./store";
+import { extract, Subscriptions } from "./store";
 
 export class EditingState {
     private state: StateDisplay;
@@ -50,38 +50,12 @@ export class EditingState {
     }
 
     selectedIsFollowing(followingIndex: number, player: Player): Readable<boolean> {
-        let selectedPlayer = this.selectedPlayer;
 
-        return new class implements Readable<boolean> {
-            private subscriptions = new Subscriptions<boolean>();
-
-            subscribe(subscriber: Subscriber<boolean>): Unsubscriber {
-                let subscriptionsUnsubscribe =
-                    this.subscriptions.subscribe(subscriber, false);
-
-                let followingUnsubscribe = () => { };
-
-                let selectedPlayerUnsubscribe =
-                    selectedPlayer.subscribe(selectedPlayer => {
-                        followingUnsubscribe();
-
-                        if (selectedPlayer == null) {
-                            this.subscriptions.notify(false);
-                        }
-                        else {
-                            followingUnsubscribe = selectedPlayer.following[followingIndex].subscribe(followedPlayer => {
-                                this.subscriptions.notify(followedPlayer == player);
-                            })
-                        }
-                    });
-
-                return () => {
-                    followingUnsubscribe();
-                    selectedPlayerUnsubscribe();
-                    subscriptionsUnsubscribe();
-                }
-            }
-        };
+        return extract(
+            this.selectedPlayer,
+            false,
+            player => player.following[followingIndex],
+            followedPlayer => followedPlayer === player);
     }
 
     setSelectedIsFollowing(followingIndex: number, followedPlayer: Player) {

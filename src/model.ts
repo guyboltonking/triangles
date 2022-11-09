@@ -3,11 +3,37 @@ import { derived, writable, type Readable, type Subscriber, type Writable } from
 type PlayerId = number;
 export const NO_PLAYER: PlayerId = -1;
 
+/** Like a writable but with a directly accessible value that can be read
+ *  without subscribing and set without triggering */
+class ReadableValue<T> implements Readable<T> {
+    private subscribers: Set<Subscriber<T>> = new Set();
+    value: T
+
+    constructor(value: T) {
+        this.value = value;
+    }
+
+    set(value: T) {
+        this.value = value;
+        this.notify();
+    }
+
+    notify() {
+        this.subscribers.forEach(subscriber => subscriber(this.value));
+    }
+
+    subscribe(subscriber: Subscriber<T>) {
+        this.subscribers.add(subscriber);
+        subscriber(this.value);
+        return () => this.subscribers.delete(subscriber);
+    }
+}
+
 export class Player {
     id: number;
     private state: State;
     private _following: [PlayerId, PlayerId] = [NO_PLAYER, NO_PLAYER];
-    position: Position;
+    position: ReadableValue<Position>;
     target: Position = null;
     speed: number = 1;
     private deleted: boolean = false;
@@ -40,7 +66,7 @@ export class Player {
     }
 
     isMoving(): boolean {
-        return this.isNotDeleted() && this.target != null && this.position != this.target;
+        return this.isNotDeleted() && this.target != null && this.position.value != this.target;
     }
 
     isNotDeleted(): boolean {
@@ -49,7 +75,7 @@ export class Player {
 
     constructor(state: State, position: Position) {
         this.state = state;
-        this.position = position;
+        this.position = new ReadableValue(position);
     }
 }
 
@@ -351,9 +377,9 @@ class State {
         for (const player of this.players) {
             if (player.isFollowing()) {
                 const targets = State.calculateTargets(
-                    player.position,
-                    player.following[0].position,
-                    player.following[1].position,
+                    player.position.value,
+                    player.following[0].position.value,
+                    player.following[1].position.value,
                 );
                 targets.forEach(target => boundingBox?.expand(target));
                 player.target = targets[0];
@@ -368,19 +394,19 @@ class State {
         for (const player of this.players) {
             if (player.target != null) {
                 const targetVector =
-                    Vector.between(player.position, player.target);
+                    Vector.between(player.position.value, player.target);
                 if (targetVector.distance() > player.speed) {
-                    player.position =
-                        player.position
-                            .add(targetVector.normalize().multiply(player.speed));
+                    player.position.set(
+                        player.position.value
+                            .add(targetVector.normalize().multiply(player.speed)));
 
                 }
                 else {
-                    player.position = player.target;
+                    player.position.value = player.target;
                 }
             }
             if (player.isNotDeleted()) {
-                boundingBox?.expand(player.position);
+                boundingBox?.expand(player.position.value);
             }
         }
     }
@@ -404,7 +430,7 @@ class State {
     }
 
     setPosition(playerId: number, position: Position) {
-        this.players[playerId].position = position;
+        this.players[playerId].position.set(position);
         this.calculateNewTargets(null);
     }
 

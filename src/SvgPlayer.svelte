@@ -3,7 +3,7 @@
 <script lang="ts">
     import { readable, type Readable } from "svelte/store";
     import type { EditController } from "./controller.js";
-    import { Player, Vector } from "./model.js";
+    import { Player, Position, Vector } from "./model.js";
     import type { EditingState } from "./view.js";
 
     const arrowWidth = 6;
@@ -14,6 +14,8 @@
 
     let showFollowingSelectors = editingState?.showFollowingSelectors;
 
+    let position: Readable<Position> = readable(null);
+
     let selected: Readable<boolean> = readable(false);
     let selectable: Readable<boolean> = readable(false);
 
@@ -21,6 +23,7 @@
     let following2: Readable<boolean> = readable(false);
 
     if (player != null) {
+        position = $player.position;
         selected = editingState.isSelected($player);
         selectable = editingState.isSelectable($player);
         following1 = editingState.selectedIsFollowing(0, $player);
@@ -87,8 +90,10 @@
                 class="triangle"
                 points="
     {$player.target.x},{$player.target.y}
-    {$player.following[0].position.x},{$player.following[0].position.y}
-    {$player.following[1].position.x},{$player.following[1].position.y}"
+    {$player.following[0].position.value.x},{$player.following[0].position.value
+                    .y}
+    {$player.following[1].position.value.x},{$player.following[1].position.value
+                    .y}"
                 stroke-width="2"
             />
             {#if $player.isMoving()}
@@ -98,11 +103,11 @@
                     cy={$player.target.y}
                     r="5"
                 />
-                {#if Vector.between($player.position, $player.target).distance() > arrowWidth}
+                {#if Vector.between($position, $player.target).distance() > arrowWidth}
                     <line
                         class="target"
-                        x1={$player.position.x}
-                        y1={$player.position.y}
+                        x1={$position.x}
+                        y1={$position.y}
                         x2={$player.target.x}
                         y2={$player.target.y}
                         stroke-width="2"
@@ -129,19 +134,14 @@
         on:mouseup={() => controller.mouseUp($player)}
         class="player {selectedClass}"
     >
-        <circle
-            cx={$player.position.x}
-            cy={$player.position.y}
-            r={PLAYER_RADIUS}
-        />
-        <text
-            x={$player.position.x + TEXT_OFFSET}
-            y={$player.position.y - TEXT_OFFSET}>{$player.id}</text
+        <circle cx={$position.x} cy={$position.y} r={PLAYER_RADIUS} />
+        <text x={$position.x + TEXT_OFFSET} y={$position.y - TEXT_OFFSET}
+            >{$player.id}</text
         >
         <circle
             class="hitbox {selectedClass}"
-            cx={$player.position.x}
-            cy={$player.position.y}
+            cx={$position.x}
+            cy={$position.y}
             r={PLAYER_HITBOX_RADIUS / zoom}
             stroke-width={Math.min(1, 1 / zoom)}
         />
@@ -151,8 +151,8 @@
             pointer-events={selectablePointerEvents}
             on:click={() => controller.clickFollowing(0, $player)}
             class="following {following1Class}"
-            cx={$player.position.x + FOLLOWING_SELECTOR_OFFSET / zoom}
-            cy={$player.position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
+            cx={$position.x + FOLLOWING_SELECTOR_OFFSET / zoom}
+            cy={$position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
             r={FOLLOWING_HITBOX_RADIUS / zoom}
             stroke-width={Math.min(1, 1 / zoom)}
         />
@@ -160,8 +160,8 @@
             pointer-events={selectablePointerEvents}
             on:click={() => controller.clickFollowing(1, $player)}
             class="following {following2Class}"
-            cx={$player.position.x - FOLLOWING_SELECTOR_OFFSET / zoom}
-            cy={$player.position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
+            cx={$position.x - FOLLOWING_SELECTOR_OFFSET / zoom}
+            cy={$position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
             r={FOLLOWING_HITBOX_RADIUS / zoom}
             stroke-width={Math.min(1, 1 / zoom)}
         />

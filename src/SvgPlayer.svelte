@@ -1,34 +1,25 @@
 <svelte:options namespace="svg" />
 
 <script lang="ts">
-    import { readable, type Readable } from "svelte/store";
+    import type { Readable } from "svelte/store";
     import type { EditController } from "./controller.js";
-    import { Player, Position, Vector } from "./model.js";
+    import { Player, Vector } from "./model.js";
     import type { EditingState } from "./view.js";
 
     export let arrowWidth: number;
 
-    export let player: Readable<Player> = null;
-    export let controller: EditController = null;
-    export let editingState: EditingState = null;
+    export let player: Readable<Player>;
+    export let controller: EditController;
+    export let editingState: EditingState;
 
     let showFollowingSelectors = editingState?.showFollowingSelectors;
 
-    let position: Readable<Position> = readable(null);
+    let position = $player.position;
 
-    let selected: Readable<boolean> = readable(false);
-    let selectable: Readable<boolean> = readable(false);
-
-    let following1: Readable<boolean> = readable(false);
-    let following2: Readable<boolean> = readable(false);
-
-    if (player != null) {
-        position = $player.position;
-        selected = editingState.isSelected($player);
-        selectable = editingState.isSelectable($player);
-        following1 = editingState.selectedIsFollowing(0, $player);
-        following2 = editingState.selectedIsFollowing(1, $player);
-    }
+    let selected = editingState.isSelected($player);
+    let selectable = editingState.isSelectable($player);
+    let following1 = editingState.selectedIsFollowing(0, $player);
+    let following2 = editingState.selectedIsFollowing(1, $player);
 
     let selectedClass, following1Class, following2Class;
     $: selectedClass = $selected ? "selected" : "";

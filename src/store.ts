@@ -24,30 +24,24 @@ export function extract<S, T, U>(
     extractor: (s: S) => Readable<T>,
     mutator: (t: T) => U): Readable<U> {
     return new class implements Readable<U> {
-        private subscriptions = new Subscriptions<U>();
-
         subscribe(subscriber: Subscriber<U>) {
-            let subscriptionsUnsubscribe = this.subscriptions.subscribe(subscriber, whenNull);
-
             let extractedUnsubscribe = () => { };
 
             let sourceUnsubscribe = store.subscribe(s => {
                 extractedUnsubscribe();
 
                 if (s == null) {
-                    this.subscriptions.notify(whenNull)
+                    subscriber(whenNull)
                 }
                 else {
-                    extractedUnsubscribe = extractor(s).subscribe(t => this.subscriptions.notify(mutator(t)));
+                    extractedUnsubscribe = extractor(s).subscribe(t => subscriber(mutator(t)));
                 }
             });
 
             return () => {
                 extractedUnsubscribe()
                 sourceUnsubscribe();
-                subscriptionsUnsubscribe();
             }
         }
-
     };
 }

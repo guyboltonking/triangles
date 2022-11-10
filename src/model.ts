@@ -32,7 +32,7 @@ export class Player {
         new ReadableValue(NO_PLAYER)
     ];
     position: ReadableValue<Position>;
-    target: Position = null;
+    target: ReadableValue<Position> = new ReadableValue(null);
     speed: number = 1;
     private deleted: boolean = false;
 
@@ -76,7 +76,7 @@ export class Player {
     }
 
     isMoving(): boolean {
-        return this.isNotDeleted() && this.target != null && this.position.value != this.target;
+        return this.isNotDeleted() && this.target != null && this.position.value != this.target.value;
     }
 
     isNotDeleted(): boolean {
@@ -392,7 +392,7 @@ class State {
                     player.rawFollowing[1].position.value,
                 );
                 targets.forEach(target => boundingBox?.expand(target));
-                player.target = targets[0];
+                player.target.set(targets[0]);
             }
             else {
                 player.target = null;
@@ -404,7 +404,7 @@ class State {
         for (const player of this.players) {
             if (player.target != null) {
                 const targetVector =
-                    Vector.between(player.position.value, player.target);
+                    Vector.between(player.position.value, player.target.value);
                 if (targetVector.distance() > player.speed) {
                     player.position.set(
                         player.position.value
@@ -412,7 +412,7 @@ class State {
 
                 }
                 else {
-                    player.position.value = player.target;
+                    player.position.value = player.target.value;
                 }
             }
             if (player.isNotDeleted()) {

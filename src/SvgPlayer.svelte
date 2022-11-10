@@ -19,8 +19,7 @@
     let followingPosition0 = $player.followingPosition[0];
     let followingPosition1 = $player.followingPosition[1];
 
-    let followedPlayer0 = $player.following[0];
-    let followedPlayer1 = $player.following[1];
+    let target = $player.target;
 
     let selected = editingState.isSelected($player);
     let selectable = editingState.isSelectable($player);
@@ -61,32 +60,27 @@
             <polygon
                 class="triangle"
                 points="
-    {$player.target.x},{$player.target.y}
+    {$target.x},{$target.y}
     {$followingPosition0.x},{$followingPosition0.y},
     {$followingPosition1.x},{$followingPosition1.y}"
                 stroke-width="2"
             />
             {#if $player.isMoving()}
-                <circle
-                    class="target"
-                    cx={$player.target.x}
-                    cy={$player.target.y}
-                    r="5"
-                />
-                {#if Vector.between($position, $player.target).distance() > arrowWidth}
+                <circle class="target" cx={$target.x} cy={$target.y} r="5" />
+                {#if Vector.between($position, $target).distance() > arrowWidth}
                     <line
                         class="target"
                         x1={$position.x}
                         y1={$position.y}
-                        x2={$player.target.x}
-                        y2={$player.target.y}
+                        x2={$target.x}
+                        y2={$target.y}
                         stroke-width="2"
                     />
                 {/if}
                 <text
                     class="target {selectedClass}"
-                    x={$player.target.x - TEXT_OFFSET * 2}
-                    y={$player.target.y - TEXT_OFFSET}>{$player.id}</text
+                    x={$target.x - TEXT_OFFSET * 2}
+                    y={$target.y - TEXT_OFFSET}>{$player.id}</text
                 >
             {/if}
         </g>

@@ -16,6 +16,9 @@
 
     let position = $player.position;
 
+    let isMoving = $player.isMoving;
+    let active = $player.active;
+
     let followingPosition0 = $player.followingPosition[0];
     let followingPosition1 = $player.followingPosition[1];
 
@@ -55,17 +58,17 @@
 </script>
 
 {#if displayMode == "targets" || displayMode == "selection"}
-    {#if $player.isFollowing()}
+    {#if $target != null}
         <g class="target {displayMode} {selectedClass}">
             <polygon
                 class="triangle"
                 points="
-    {$target.x},{$target.y}
-    {$followingPosition0.x},{$followingPosition0.y},
-    {$followingPosition1.x},{$followingPosition1.y}"
+                    {$target.x},{$target.y},
+                    {$followingPosition0.x},{$followingPosition0.y},
+                    {$followingPosition1.x},{$followingPosition1.y}"
                 stroke-width="2"
             />
-            {#if $player.isMoving()}
+            {#if $isMoving}
                 <circle class="target" cx={$target.x} cy={$target.y} r="5" />
                 {#if Vector.between($position, $target).distance() > arrowWidth}
                     <line
@@ -85,7 +88,7 @@
             {/if}
         </g>
     {/if}
-{:else if displayMode == "player" && $player.isNotDeleted()}
+{:else if displayMode == "player" && $active}
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <!-- TODO: disable event handling when any player is being dragged; maybe via something like a readable on editingState, like canBeSelected?
     -->

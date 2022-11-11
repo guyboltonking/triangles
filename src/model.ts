@@ -4,6 +4,11 @@ import { extract, Subscriptions } from "./store";
 type PlayerId = number;
 export const NO_PLAYER: PlayerId = -1;
 
+function logValue(name, value) {
+    console.log(`${name} = ${value}`);
+    return value;
+}
+
 /** Like a writable but with a directly accessible value that can be read
  *  without subscribing and set without triggering */
 class ReadableValue<T> implements Readable<T> {
@@ -31,10 +36,10 @@ export class Player {
         new ReadableValue(NO_PLAYER),
         new ReadableValue(NO_PLAYER)
     ];
-    position: ReadableValue<Position>;
+    position: ReadableValue<Position> = new ReadableValue(null);
     target: ReadableValue<Position> = new ReadableValue(null);
     speed: number = 1;
-    private deleted: boolean = false;
+    active = new ReadableValue(true);
 
     get rawFollowing(): [Player, Player] {
         return this._following.map(id =>
@@ -68,24 +73,27 @@ export class Player {
     }
 
     delete() {
-        this.deleted = true;
+        this.active.set(false);
     }
 
     isFollowing(): boolean {
-        return this.isNotDeleted() && this._following.every(id => id.value != NO_PLAYER);
+        return this.active.value && this._following.every(id => id.value != NO_PLAYER);
     }
 
-    isMoving(): boolean {
-        return this.isNotDeleted() && this.target != null && this.position.value != this.target.value;
+    isMovingRaw(active: boolean, target: Position, position: Position): boolean {
+        return active &&
+            target !== null &&
+            !position.equals(target);
     }
 
-    isNotDeleted(): boolean {
-        return !this.deleted;
-    }
+    isMoving =
+        derived([this.active, this.target, this.position],
+            ([active, target, position]) =>
+                this.isMovingRaw(active, target, position));
 
     constructor(state: State, position: Position) {
         this.state = state;
-        this.position = new ReadableValue(position);
+        this.position.set(position);
     }
 }
 
@@ -101,6 +109,18 @@ class XY extends Array<number> {
 
     get y() { return this[1]; }
     set y(y_: number) { this[1] = y_; }
+
+    equals(other: XY) {
+        if (this === other) {
+            return true;
+        }
+
+        if (this == null || other == null) {
+            return false;
+        }
+
+        return this[0] == other[0] && this[1] == other[1];
+    }
 }
 
 export class Dimensions extends XY {
@@ -230,8 +250,11 @@ export class StateDisplay {
     players: Readable<Readable<Player>[]> = this.players_;
 
     finished: Readable<boolean> = derived(this.anyPlayerChangedStore, () =>
-        this.state.players.every(player => !player.isMoving())
-    );
+        this.state.players.every(player =>
+            !player.isMovingRaw(
+                player.active.value,
+                player.target.value,
+                player.position.value)));
 
     private updatePlayerStores() {
         // playerStores length will always be <= players length i.e. we can only
@@ -395,14 +418,14 @@ class State {
                 player.target.set(targets[0]);
             }
             else {
-                player.target = null;
+                player.target.set(null);
             }
         }
     }
 
     private calculateNewPositions(boundingBox: BoundingBox) {
         for (const player of this.players) {
-            if (player.target != null) {
+            if (player.target.value != null) {
                 const targetVector =
                     Vector.between(player.position.value, player.target.value);
                 if (targetVector.distance() > player.speed) {
@@ -415,7 +438,7 @@ class State {
                     player.position.value = player.target.value;
                 }
             }
-            if (player.isNotDeleted()) {
+            if (player.active.value) {
                 boundingBox?.expand(player.position.value);
             }
         }

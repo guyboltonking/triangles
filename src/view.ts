@@ -1,10 +1,9 @@
-import { derived, writable, type Readable, type Subscriber, type Unsubscriber, type Writable } from "svelte/store";
+import { derived, writable, type Readable, type Writable } from "svelte/store";
 import type { Player, Position, StateDisplay } from "./model";
-import { extract, Subscriptions } from "./store";
+import { extract } from "./store";
 
 export class EditingState {
     private state: StateDisplay;
-    // The player that has been selected; only updates on selection change
     selectedPlayer: Writable<Player> = writable(null);
     showFollowingSelectors: Writable<boolean> = writable(false);
     private dragging: Writable<boolean> = writable(false);

@@ -267,22 +267,26 @@ export class StateDisplay {
     margin: Writable<number> = writable(10);
     zoomMode: Writable<ZoomMode> = writable(ZoomMode.SCREEN);
 
-    viewBox: Readable<ViewBox> = derived([
-        this.dimensions, this.margin, this.zoomMode, this.anyPlayerChangedStore
-    ], ([dimensions, margin, zoomMode, _]) =>
-        StateDisplay.calculateViewBox(
-            dimensions, margin, zoomMode, this.state.boundingBox));
+    viewBox: Readable<ViewBox>;
 
     private state: State;
 
     constructor(state: State) {
         this.state = state;
+        this.viewBox = derived([
+            this.dimensions, this.margin,
+            this.zoomMode, this.state.boundingBox
+        ], ([dimensions, margin, zoomMode, boundingBox]) =>
+            StateDisplay.calculateViewBox(
+                dimensions, margin, zoomMode, boundingBox));
         this.updatePlayerStores();
         this.state.update();
+        this.anyPlayerChangedStore.trigger();
     }
 
     updatePositions(): StateDisplay {
         this.state.update();
+        this.anyPlayerChangedStore.trigger();
         return this;
     }
 
@@ -360,7 +364,7 @@ const SIN60 = Math.sin(Math.PI / 3);
 
 class State {
     players: Player[] = [];
-    boundingBox: BoundingBox;
+    boundingBox: Writable<BoundingBox> = writable(null);
 
     // Return a tuple of [preferred-target, other-target]
     private static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
@@ -433,9 +437,10 @@ class State {
     }
 
     update() {
-        this.boundingBox = new BoundingBox();
-        this.calculateNewTargets(this.boundingBox);
-        this.calculateNewPositions(this.boundingBox);
+        let boundingBox = new BoundingBox();
+        this.calculateNewTargets(boundingBox);
+        this.calculateNewPositions(boundingBox);
+        this.boundingBox.set(boundingBox);
     }
 
     addPlayer(position: Position): Player {

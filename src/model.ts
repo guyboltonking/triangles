@@ -70,6 +70,9 @@ export class Player {
                 this._following[followingIndex].set(NO_PLAYER);
             }
         }
+        if (!this.isFollowing()) {
+            this.target.set(null);
+        }
     }
 
     delete() {
@@ -243,11 +246,10 @@ class Triggerable implements Readable<void> {
 
 export class StateDisplay {
 
-    private playerStores: Writable<Player>[] = [];
     private anyPlayerChangedStore: Triggerable = new Triggerable();
 
-    private players_: Writable<Readable<Player>[]> = writable(this.playerStores);
-    players: Readable<Readable<Player>[]> = this.players_;
+    private players_: Writable<Player[]> = writable(null);
+    players: Readable<Player[]> = this.players_;
 
     finished: Readable<boolean> = derived(this.anyPlayerChangedStore, () =>
         this.state.players.every(player =>
@@ -257,17 +259,7 @@ export class StateDisplay {
                 player.position.value)));
 
     private updatePlayerStores() {
-        // playerStores length will always be <= players length i.e. we can only
-        // grow
-        for (let i = this.playerStores.length; i < this.state.players.length; ++i) {
-            this.playerStores.push(writable(this.state.players[i]));
-        }
-        this.players_.set(this.playerStores);
-        this.anyPlayerChangedStore.trigger();
-    }
-
-    private updatePlayers() {
-        this.state.players.forEach(player => this.playerStores[player.id].set(player));
+        this.players_.set(this.state.players);
         this.anyPlayerChangedStore.trigger();
     }
 
@@ -291,13 +283,11 @@ export class StateDisplay {
 
     updatePositions(): StateDisplay {
         this.state.update();
-        this.updatePlayers();
         return this;
     }
 
     follow(playerId: number, followingId: number, followingPlayerId: number) {
         this.state.follow(playerId, followingId, followingPlayerId);
-        this.updatePlayers();
     }
 
     addPlayer(position: Position): Player {
@@ -308,12 +298,10 @@ export class StateDisplay {
 
     deletePlayer(playerId: number) {
         this.state.deletePlayer(playerId);
-        this.updatePlayers();
     }
 
     setPosition(playerId: number, position: Position) {
         this.state.setPosition(playerId, position);
-        this.updatePlayers();
     }
 
     private static calculateViewBox(

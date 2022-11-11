@@ -77,7 +77,7 @@
   </select>
   {zoom}
   {#if running}FPS: {fps}{/if}
-  <PlayerEditor {controller} />
+  <PlayerEditor {controller} {editingState} />
 </div>
 
 <Playfield id="display" {state} {controller} {editingState} />

@@ -1,8 +1,19 @@
 <script lang="ts">
+    import type { Readable } from "svelte/store";
     import { EditController, EditorMode } from "./controller";
+    import type { Position } from "./model";
     import type { EditingState } from "./view";
 
     export let controller: EditController;
+    export let editingState: EditingState;
+    let selectedPlayer = editingState.selectedPlayer;
+    let position: Readable<Position> = null;
+
+    $: if ($selectedPlayer != null) {
+        position = $selectedPlayer.position;
+    } else {
+        position = null;
+    }
 
     let editorMode: EditorMode = EditorMode.EDIT;
 
@@ -38,3 +49,20 @@
     />
     Delete
 </label>
+
+<div class="selectedPlayer">
+    {#if $selectedPlayer}
+        Player: {$selectedPlayer.id} {$position.x} {$position.y}
+    {:else}
+        &nbsp;
+    {/if}
+</div>
+
+<style>
+    .selectedPlayer {
+        display: inline;
+        border-left: 1px solid black;
+        padding-left: 1em;
+        margin-left: 1em;
+    }
+</style>

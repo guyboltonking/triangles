@@ -4,6 +4,7 @@ import { extract, Subscriptions } from "./store";
 
 export class EditingState {
     private state: StateDisplay;
+    // The player that has been selected; only updates on selection change
     selectedPlayer: Writable<Player> = writable(null);
     showFollowingSelectors: Writable<boolean> = writable(false);
     private dragging: Writable<boolean> = writable(false);

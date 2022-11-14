@@ -2,7 +2,7 @@ import { NO_PLAYER, Position, type Player } from "./model";
 import type { EditingState } from "./view";
 
 export enum EditorMode {
-    EDIT, ADD, DELETE
+    MODIFY, ADD, DELETE
 };
 
 abstract class ModalController {
@@ -65,7 +65,7 @@ class NoSelection extends ControllerWithEditors {
     }
 
     click(player: Player): ModalController {
-        return this.editors.editing.click(player);
+        return this.editors.modifying.click(player);
     }
 
     mouseOver(player: Player): ModalController {
@@ -79,18 +79,18 @@ class NoSelection extends ControllerWithEditors {
     }
 
     startDragging(player: Player): ModalController {
-        return this.editors.editing.startDragging(player);
+        return this.editors.modifying.startDragging(player);
     }
 }
 
-class Editing extends ControllerWithEditors {
+class Modifying extends ControllerWithEditors {
     setMode(editorMode: EditorMode): ModalController {
         switch (editorMode) {
             case EditorMode.DELETE:
                 this.editingState.stopEditing();
                 return this.editors.deleting;
             case EditorMode.ADD:
-                return this.editors.addingEditing;
+                return this.editors.addingModifying;
             default:
                 return this;
         }
@@ -131,7 +131,7 @@ class Editing extends ControllerWithEditors {
 class Deleting extends NoSelection {
     setMode(editorMode: EditorMode): ModalController {
         switch (editorMode) {
-            case EditorMode.EDIT:
+            case EditorMode.MODIFY:
                 return this.editors.noSelection;
             case EditorMode.ADD:
                 return this.editors.addingNoSelection;
@@ -151,11 +151,11 @@ class Deleting extends NoSelection {
     }
 }
 
-class AddingEditing extends Editing {
+class AddingModifying extends Modifying {
     setMode(editorMode: EditorMode): ModalController {
         switch (editorMode) {
-            case EditorMode.EDIT:
-                return this.editors.editing;
+            case EditorMode.MODIFY:
+                return this.editors.modifying;
             case EditorMode.DELETE:
                 this.editingState.stopEditing();
                 return this.editors.deleting;
@@ -174,7 +174,7 @@ class AddingEditing extends Editing {
 class AddingNoSelection extends NoSelection {
     setMode(editorMode: EditorMode): ModalController {
         switch (editorMode) {
-            case EditorMode.EDIT:
+            case EditorMode.MODIFY:
                 return this.editors.noSelection;
             case EditorMode.DELETE:
                 return this.editors.deleting;
@@ -185,18 +185,18 @@ class AddingNoSelection extends NoSelection {
 
     click(player: Player): ModalController {
         this.editingState.startEditing(player);
-        return this.editors.addingEditing;
+        return this.editors.addingModifying;
     }
 
     clickBackground(position: Position): ModalController {
-        return this.editors.addingEditing.clickBackground(position);
+        return this.editors.addingModifying.clickBackground(position);
     }
 }
 
 class Editors {
     noSelection: NoSelection;
-    editing: Editing;
-    addingEditing: AddingEditing;
+    modifying: Modifying;
+    addingModifying: AddingModifying;
     addingNoSelection: AddingNoSelection;
     deleting: Deleting;
 }
@@ -208,8 +208,8 @@ class DragEditController implements DragEventSink {
         let editors: Editors = new Editors();
 
         editors.noSelection = new NoSelection(editingState, editors);
-        editors.editing = new Editing(editingState, editors);
-        editors.addingEditing = new AddingEditing(editingState, editors);
+        editors.modifying = new Modifying(editingState, editors);
+        editors.addingModifying = new AddingModifying(editingState, editors);
         editors.addingNoSelection = new AddingNoSelection(editingState, editors);
         editors.deleting = new Deleting(editingState, editors);
 

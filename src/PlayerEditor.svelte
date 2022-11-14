@@ -15,7 +15,7 @@
         position = null;
     }
 
-    let editorMode: EditorMode = EditorMode.EDIT;
+    let editorMode: EditorMode = EditorMode.MODIFY;
 
     $: controller.setMode(editorMode);
 </script>
@@ -25,9 +25,9 @@
         type="radio"
         bind:group={editorMode}
         name="editor"
-        value={EditorMode.EDIT}
+        value={EditorMode.MODIFY}
     />
-    Edit
+    Modify
 </label>
 
 <label>

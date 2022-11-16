@@ -3,6 +3,7 @@
   import { EditController } from "./controller.js";
   import { createStateDisplay, ZoomMode } from "./model.js";
   import PlayerEditor from "./PlayerEditor.svelte";
+  import PlayerTextEditor from "./PlayerTextEditor.svelte";
   import Playfield from "./Playfield.svelte";
   import { EditingState } from "./view.js";
 
@@ -59,6 +60,15 @@
     }
   }
 
+  let showPlayerTextEditor = false;
+
+  function editPlayers() {
+    if (running) {
+      stop();
+    }
+    showPlayerTextEditor = true;
+  }
+
   $: {
     if (running && $finished) {
       togglePause();
@@ -68,8 +78,9 @@
 
 <div id="controls">
   <button on:click={togglePause}>
-    {#if running}pause{:else}run{/if}
+    {#if running}⏸{:else}▶️{/if}
   </button>
+  <button on:click={editPlayers}> Edit </button>
   Zoom:
   <select bind:value={$zoomMode}>
     <option value={ZoomMode.SCREEN}>Screen</option>
@@ -81,3 +92,7 @@
 </div>
 
 <Playfield id="display" {state} {controller} {editingState} />
+
+{#if showPlayerTextEditor}
+  <PlayerTextEditor on:close={() => (showPlayerTextEditor = false)} {state} />
+{/if}

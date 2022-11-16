@@ -1,8 +1,9 @@
 <svelte:options namespace="svg" />
 
 <script lang="ts">
+    import type { Readable } from "svelte/store";
     import type { EditController } from "./controller.js";
-    import { Player, Vector } from "./model.js";
+    import { Player, Position, Vector } from "./model.js";
     import type { EditingState } from "./view.js";
 
     export let arrowWidth: number;
@@ -13,20 +14,29 @@
 
     let showFollowingSelectors = editingState?.showFollowingSelectors;
 
-    let position = player.position;
+    let position: Readable<Position>;
+    $: position = player.position;
+    let isMoving: Readable<boolean>;
+    $: isMoving = player.isMoving;
+    let active: Readable<boolean>;
+    $: active = player.active;
 
-    let isMoving = player.isMoving;
-    let active = player.active;
+    let followingPosition0: Readable<Position>;
+    $: followingPosition0 = player.followingPosition[0];
+    let followingPosition1: Readable<Position>;
+    $: followingPosition1 = player.followingPosition[1];
 
-    let followingPosition0 = player.followingPosition[0];
-    let followingPosition1 = player.followingPosition[1];
+    let target: Readable<Position>;
+    $: target = player.target;
 
-    let target = player.target;
-
-    let selected = editingState.isSelected(player);
-    let selectable = editingState.isSelectable(player);
-    let following1 = editingState.selectedIsFollowing(0, player);
-    let following2 = editingState.selectedIsFollowing(1, player);
+    let selected: Readable<boolean>;
+    $: selected = editingState.isSelected(player);
+    let selectable: Readable<boolean>;
+    $: selectable = editingState.isSelectable(player);
+    let following1: Readable<boolean>;
+    $: following1 = editingState.selectedIsFollowing(0, player);
+    let following2: Readable<boolean>;
+    $: following2 = editingState.selectedIsFollowing(1, player);
 
     let selectedClass, following1Class, following2Class;
     $: selectedClass = $selected ? "selected" : "";

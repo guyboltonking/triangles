@@ -41,6 +41,10 @@ export class Player {
     speed: number = 1;
     active = new ReadableValue(true);
 
+    getFollowingIds(): [number, number] {
+        return this._following.map(id => id.value) as [number, number];
+    }
+
     get rawFollowing(): [Player, Player] {
         return this._following.map(id =>
             id.value != NO_PLAYER ? this.state.players[id.value] : null) as [Player, Player];
@@ -308,6 +312,15 @@ export class StateDisplay {
         this.state.setPosition(playerId, position);
     }
 
+    export() {
+        return this.state.export();
+    }
+
+    import(json: string) {
+        this.state.import(json);
+        this.updatePlayerStores();
+    }
+
     private static calculateViewBox(
         dimensions: Dimensions,
         margin: number,
@@ -465,6 +478,44 @@ class State {
         if (update) {
             this.calculateNewTargets(null);
         }
+    }
+
+    export(): string {
+        return JSON.stringify({
+            "players": this.players
+                .filter(player => player.active.value)
+                .map(player => {
+                    return {
+                        "id": player.id,
+                        "position": player.position.value,
+                        "following": player.getFollowingIds(),
+                    }
+                })
+        });
+    }
+
+    import(json: string) {
+        let playerObjs = JSON.parse(json)["players"];
+        this.players.length = 0;
+        playerObjs.sort((a, b) => a.id - b.id);
+
+        let nextPlayerId = 0;
+        for (let playerObj of playerObjs) {
+            while (nextPlayerId !== playerObj.id) {
+                let player = this.addPlayer(new Position(0, 0));
+                player.active.set(false);
+                ++nextPlayerId;
+            }
+            this.addPlayer(new Position(...playerObj.position as [number, number]));
+            ++nextPlayerId;
+        }
+
+        for (let playerObj of playerObjs) {
+            this.follow(playerObj.id, 0, playerObj.following[0], false);
+            this.follow(playerObj.id, 1, playerObj.following[1], false);
+        }
+
+        this.calculateNewTargets(null);
     }
 }
 

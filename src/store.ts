@@ -31,6 +31,7 @@ export function extract<S, T, U>(
                 extractedUnsubscribe();
 
                 if (s == null) {
+                    extractedUnsubscribe = () => { };
                     subscriber(whenNull)
                 }
                 else {

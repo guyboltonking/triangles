@@ -262,6 +262,7 @@ interface DragEventSink {
     startDragging(player: Player): void;
     drag(player: Player, position: Position): void;
     stopDragging(player: Player): void;
+    mouseOut(player: Player): void;
 }
 
 class DragAdaptor {
@@ -308,6 +309,20 @@ class DragAdaptor {
             this.draggedPlayerId = NO_PLAYER;
         }
     }
+
+    mouseOut(player: Player) {
+        if (this.draggedPlayerId == player.id &&
+            (this.dragState == DragState.MOUSEDOWN || this.dragState == DragState.DRAGGING)) {
+
+            if (this.dragState == DragState.DRAGGING) {
+                this.dragEventSink.stopDragging(player);
+            }
+
+            this.dragState = DragState.MOUSEDOWN;
+            this.draggedPlayerId = NO_PLAYER;
+        }
+        this.dragEventSink.mouseOut(player);
+    }
 }
 
 export class EditController {
@@ -346,7 +361,7 @@ export class EditController {
     }
 
     mouseOut(player: Player) {
-        this.dragEditController.mouseOut(player);
+        this.dragAdaptor.mouseOut(player);
     }
 
     mouseDown(player: Player) {

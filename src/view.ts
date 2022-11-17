@@ -54,7 +54,7 @@ export class EditingState {
         return extract(
             this.selectedPlayer,
             false,
-            player => player.following[followingIndex],
+            selectedPlayer => this.state.following(selectedPlayer, followingIndex),
             followedPlayer => followedPlayer === player);
     }
 

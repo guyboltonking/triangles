@@ -31,7 +31,6 @@ class ReadableValue<T> implements Readable<T> {
 
 export class Player {
     id: number;
-    private state: State;
     private _following: [ReadableValue<PlayerId>, ReadableValue<PlayerId>] = [
         new ReadableValue(NO_PLAYER),
         new ReadableValue(NO_PLAYER)
@@ -45,21 +44,19 @@ export class Player {
         return this._following.map(id => id.value) as [number, number];
     }
 
-    get rawFollowing(): [Player, Player] {
-        return this._following.map(id =>
-            id.value != NO_PLAYER ? this.state.players[id.value] : null) as [Player, Player];
+    rawFollowing(state: State, followingIndex): Player {
+        let id = this._following[followingIndex];
+        return id.value != NO_PLAYER ? state.players[id.value] : null;
     }
 
-    following: [Readable<Player>, Readable<Player>] =
-        this._following.map(idStore =>
-            derived([idStore], ([id]) =>
-                id != NO_PLAYER ? this.state.players[id] : null)
-        ) as [Readable<Player>, Readable<Player>];
+    following(state: State, followingIndex: number): Readable<Player> {
+        return derived(this._following[followingIndex], id =>
+            id != NO_PLAYER ? state.players[id] : null);
+    }
 
-    followingPosition: [Readable<Position>, Readable<Position>] =
-        this.following.map(playerStore =>
-            extract(playerStore, null, player => player.position, position => position)
-        ) as [Readable<Position>, Readable<Position>];
+    followingPosition(state: State, followingIndex: number): Readable<Position> {
+        return extract(this.following(state, followingIndex), null, player => player.position, position => position);
+    }
 
     follow(followingIndex: number, followingPlayerId: PlayerId) {
         if (followingPlayerId != this.id &&
@@ -98,8 +95,7 @@ export class Player {
             ([active, target, position]) =>
                 this.isMovingRaw(active, target, position));
 
-    constructor(state: State, position: Position) {
-        this.state = state;
+    constructor(position: Position) {
         this.position.set(position);
     }
 }
@@ -312,6 +308,14 @@ export class StateDisplay {
         this.state.setPosition(playerId, position);
     }
 
+    following(player: Player, followingIndex: number) {
+        return player.following(this.state, followingIndex);
+    }
+
+    followingPosition(player: Player, followingIndex: number) {
+        return player.followingPosition(this.state, followingIndex);
+    }
+
     export() {
         return this.state.export();
     }
@@ -416,8 +420,8 @@ class State {
             if (player.isFollowing()) {
                 const targets = State.calculateTargets(
                     player.position.value,
-                    player.rawFollowing[0].position.value,
-                    player.rawFollowing[1].position.value,
+                    player.rawFollowing(this, 0).position.value,
+                    player.rawFollowing(this, 1).position.value,
                 );
                 targets.forEach(target => boundingBox?.expand(target));
                 player.target.set(targets[0]);
@@ -457,7 +461,7 @@ class State {
     }
 
     addPlayer(position: Position): Player {
-        let player = new Player(this, position);
+        let player = new Player(position);
         player.id = this.players.length;
         this.players.push(player);
         return player;

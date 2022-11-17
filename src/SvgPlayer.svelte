@@ -3,12 +3,13 @@
 <script lang="ts">
     import type { Readable } from "svelte/store";
     import type { EditController } from "./controller.js";
-    import { Player, Position, Vector } from "./model.js";
+    import { Player, Position, StateDisplay, Vector } from "./model.js";
     import type { EditingState } from "./view.js";
 
     export let arrowWidth: number;
 
     export let player: Player;
+    export let state: StateDisplay;
     export let controller: EditController;
     export let editingState: EditingState;
 
@@ -22,9 +23,9 @@
     $: active = player.active;
 
     let followingPosition0: Readable<Position>;
-    $: followingPosition0 = player.followingPosition[0];
+    $: followingPosition0 = state.followingPosition(player, 0);
     let followingPosition1: Readable<Position>;
-    $: followingPosition1 = player.followingPosition[1];
+    $: followingPosition1 = state.followingPosition(player, 1);
 
     let target: Readable<Position>;
     $: target = player.target;

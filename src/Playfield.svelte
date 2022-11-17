@@ -86,6 +86,7 @@
                 {player}
                 {controller}
                 {editingState}
+                {state}
                 {arrowWidth}
             />
         {/each}
@@ -95,6 +96,7 @@
                 {player}
                 {controller}
                 {editingState}
+                {state}
                 {arrowWidth}
             />
         {/each}
@@ -105,6 +107,7 @@
                 {controller}
                 {editingState}
                 {arrowWidth}
+                {state}
                 {zoom}
             />
         {/each}

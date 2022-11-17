@@ -96,3 +96,9 @@
 {#if showPlayerTextEditor}
   <PlayerTextEditor on:close={() => (showPlayerTextEditor = false)} {state} />
 {/if}
+
+<style>
+  #controls {
+    overflow: hidden;
+  }
+</style>

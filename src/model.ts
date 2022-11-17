@@ -4,9 +4,8 @@ import { extract, Subscriptions } from "./store";
 type PlayerId = number;
 export const NO_PLAYER: PlayerId = -1;
 
-function logValue(name, value) {
-    console.log(`${name} = ${value}`);
-    return value;
+export function trunc(n: number) {
+    return Math.trunc(n);
 }
 
 /** Like a writable but with a directly accessible value that can be read

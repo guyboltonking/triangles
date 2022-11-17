@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Readable } from "svelte/store";
     import { EditController, EditorMode } from "./controller";
-    import type { Position } from "./model";
+    import { trunc, type Position } from "./model";
     import type { EditingState } from "./view";
 
     export let controller: EditController;
@@ -52,7 +52,9 @@
 
 <div class="selectedPlayer">
     {#if $selectedPlayer}
-        Player: {$selectedPlayer.id} {$position.x} {$position.y}
+        Player {$selectedPlayer.id}: ({trunc($position.x)}, {trunc(
+            $position.y
+        )})
     {:else}
         &nbsp;
     {/if}

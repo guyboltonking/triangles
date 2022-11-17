@@ -15,33 +15,38 @@
 
     let showFollowingSelectors = editingState?.showFollowingSelectors;
 
+    // These all depend on the current value of player, which can change if we
+    // import a new set of players.
     let position: Readable<Position>;
-    $: position = player.position;
     let isMoving: Readable<boolean>;
-    $: isMoving = player.isMoving;
     let active: Readable<boolean>;
-    $: active = player.active;
-
     let followingPosition0: Readable<Position>;
-    $: followingPosition0 = state.followingPosition(player, 0);
     let followingPosition1: Readable<Position>;
-    $: followingPosition1 = state.followingPosition(player, 1);
-
     let target: Readable<Position>;
-    $: target = player.target;
-
     let selected: Readable<boolean>;
-    $: selected = editingState.isSelected(player);
     let selectable: Readable<boolean>;
-    $: selectable = editingState.isSelectable(player);
     let following1: Readable<boolean>;
-    $: following1 = editingState.selectedIsFollowing(0, player);
     let following2: Readable<boolean>;
-    $: following2 = editingState.selectedIsFollowing(1, player);
 
-    let selectedClass, following1Class, following2Class;
-    $: selectedClass = $selected ? "selected" : "";
     $: {
+        position = player.position;
+        isMoving = player.isMoving;
+        active = player.active;
+
+        followingPosition0 = state.followingPosition(player, 0);
+        followingPosition1 = state.followingPosition(player, 1);
+
+        target = player.target;
+
+        selected = editingState.isSelected(player);
+        selectable = editingState.isSelectable(player);
+        following1 = editingState.selectedIsFollowing(0, player);
+        following2 = editingState.selectedIsFollowing(1, player);
+    }
+
+    let selectedClass: string, following1Class: string, following2Class: string;
+    $: {
+        selectedClass = $selected ? "selected" : "";
         if ($following1) {
             following1Class = "selected";
             following2Class = "unselectable";

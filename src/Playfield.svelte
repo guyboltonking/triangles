@@ -82,6 +82,16 @@
         />
         {#each $players as player}
             <SvgPlayer
+                displayMode="history"
+                {player}
+                {controller}
+                {editingState}
+                {state}
+                {arrowWidth}
+            />
+        {/each}
+        {#each $players as player}
+            <SvgPlayer
                 displayMode="targets"
                 {player}
                 {controller}

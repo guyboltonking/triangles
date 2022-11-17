@@ -1,7 +1,7 @@
 <svelte:options namespace="svg" />
 
 <script lang="ts">
-    import type { Readable } from "svelte/store";
+    import { derived, type Readable } from "svelte/store";
     import type { EditController } from "./controller.js";
     import { Player, Position, StateDisplay, Vector } from "./model.js";
     import type { EditingState } from "./view.js";
@@ -27,11 +27,15 @@
     let selectable: Readable<boolean>;
     let following1: Readable<boolean>;
     let following2: Readable<boolean>;
+    let historyPoints: Readable<string>;
 
     $: {
         position = player.position;
         isMoving = player.isMoving;
         active = player.active;
+        historyPoints = derived(player.history, (history) =>
+            history.map((pos) => `${pos.x},${pos.y}`).join(" ")
+        );
 
         followingPosition0 = state.followingPosition(player, 0);
         followingPosition1 = state.followingPosition(player, 1);
@@ -72,7 +76,9 @@
     const FOLLOWING_HITBOX_RADIUS = 10;
 </script>
 
-{#if displayMode == "targets" || displayMode == "selection"}
+{#if displayMode == "history"}
+    <polyline class="history" points={$historyPoints} stroke-width="2" />
+{:else if displayMode == "targets" || displayMode == "selection"}
     {#if $target != null}
         <g class="target {displayMode} {selectedClass}">
             <polygon
@@ -224,6 +230,12 @@
     .target.selection.selected line {
         stroke: red;
         marker-end: url(#arrowhead-selected);
+    }
+
+    .history {
+        fill: none;
+        stroke: burlywood;
+        stroke-dasharray: 2, 2;
     }
 
     text {

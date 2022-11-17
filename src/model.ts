@@ -43,6 +43,14 @@ export class Player {
     speed: WritableValue<number> = new WritableValue(1);
     active = new WritableValue(true);
 
+    private _history: Position[] = [];
+    history: Readable<Position[]> = derived(this.position, position => {
+        if (position != null) {
+            this._history.push(position);
+        }
+        return this._history;
+    }, this._history);
+
     getFollowingIds(): [number, number] {
         return this._following.map(id => id.value) as [number, number];
     }

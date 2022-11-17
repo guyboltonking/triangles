@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Readable } from "svelte/store";
+    import type { Readable, Writable } from "svelte/store";
     import { EditController, EditorMode } from "./controller";
     import { trunc, type Position } from "./model";
     import type { EditingState } from "./view";
@@ -8,11 +8,14 @@
     export let editingState: EditingState;
     let selectedPlayer = editingState.selectedPlayer;
     let position: Readable<Position> = null;
+    let speed: Writable<number> = null;
 
     $: if ($selectedPlayer != null) {
         position = $selectedPlayer.position;
+        speed = $selectedPlayer.speed;
     } else {
         position = null;
+        speed = null;
     }
 
     let editorMode: EditorMode = EditorMode.MODIFY;
@@ -54,7 +57,7 @@
     {#if $selectedPlayer}
         Player {$selectedPlayer.id}: ({trunc($position.x)}, {trunc(
             $position.y
-        )})
+        )}) Speed: <input bind:value={$speed} />
     {:else}
         &nbsp;
     {/if}

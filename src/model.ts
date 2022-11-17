@@ -1,4 +1,4 @@
-import { derived, writable, type Readable, type Subscriber, type Writable } from "svelte/store";
+import { derived, writable, type Readable, type Subscriber, type Updater, type Writable } from "svelte/store";
 import { extract, Subscriptions } from "./store";
 
 type PlayerId = number;
@@ -10,7 +10,7 @@ export function trunc(n: number) {
 
 /** Like a writable but with a directly accessible value that can be read
  *  without subscribing and set without triggering */
-class ReadableValue<T> implements Readable<T> {
+class WritableValue<T> implements Writable<T> {
     private subscriptions = new Subscriptions<T>();
     value: T;
 
@@ -23,6 +23,10 @@ class ReadableValue<T> implements Readable<T> {
         this.subscriptions.notify(this.value);
     }
 
+    update(updater: Updater<T>): void {
+        this.set(updater(this.value));
+    }
+
     subscribe(subscriber: Subscriber<T>) {
         return this.subscriptions.subscribe(subscriber, this.value);
     }
@@ -30,14 +34,14 @@ class ReadableValue<T> implements Readable<T> {
 
 export class Player {
     id: number;
-    private _following: [ReadableValue<PlayerId>, ReadableValue<PlayerId>] = [
-        new ReadableValue(NO_PLAYER),
-        new ReadableValue(NO_PLAYER)
+    private _following: [WritableValue<PlayerId>, WritableValue<PlayerId>] = [
+        new WritableValue(NO_PLAYER),
+        new WritableValue(NO_PLAYER)
     ];
-    position: ReadableValue<Position> = new ReadableValue(null);
-    target: ReadableValue<Position> = new ReadableValue(null);
-    speed: number = 1;
-    active = new ReadableValue(true);
+    position: WritableValue<Position> = new WritableValue(null);
+    target: WritableValue<Position> = new WritableValue(null);
+    speed: WritableValue<number> = new WritableValue(1);
+    active = new WritableValue(true);
 
     getFollowingIds(): [number, number] {
         return this._following.map(id => id.value) as [number, number];
@@ -434,14 +438,14 @@ class State {
             if (player.target.value != null) {
                 const targetVector =
                     Vector.between(player.position.value, player.target.value);
-                if (targetVector.distance() > player.speed) {
+                if (targetVector.distance() > player.speed.value) {
                     player.position.set(
                         player.position.value
-                            .add(targetVector.normalize().multiply(player.speed)));
+                            .add(targetVector.normalize().multiply(player.speed.value)));
 
                 }
                 else {
-                    player.position.value = player.target.value;
+                    player.position.set(player.target.value);
                 }
             }
             if (player.active.value) {
@@ -501,6 +505,7 @@ class State {
                             "id": player.id,
                             "position": player.position.value,
                             "following": player.getFollowingIds(),
+                            "speed": player.speed.value,
                         }
                     })
             },
@@ -522,8 +527,9 @@ class State {
                 player.active.set(false);
                 ++nextPlayerId;
             }
-            State._addPlayer(players,
+            let player = State._addPlayer(players,
                 new Position(...playerObj.position as [number, number]));
+            player.speed.set(playerObj.speed);
             ++nextPlayerId;
         }
 

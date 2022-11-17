@@ -44,18 +44,16 @@ export class Player {
         return this._following.map(id => id.value) as [number, number];
     }
 
+    private _rawFollowing(state: State, followingId: number): Player {
+        return followingId != NO_PLAYER ? state.players[followingId] : null;
+    }
+
     rawFollowing(state: State, followingIndex): Player {
-        let id = this._following[followingIndex];
-        return id.value != NO_PLAYER ? state.players[id.value] : null;
+        return this._rawFollowing(state, this._following[followingIndex].value);
     }
 
     following(state: State, followingIndex: number): Readable<Player> {
-        return derived(this._following[followingIndex], id =>
-            id != NO_PLAYER ? state.players[id] : null);
-    }
-
-    followingPosition(state: State, followingIndex: number): Readable<Position> {
-        return extract(this.following(state, followingIndex), null, player => player.position, position => position);
+        return derived(this._following[followingIndex], id => this._rawFollowing(state, id));
     }
 
     follow(followingIndex: number, followingPlayerId: PlayerId) {
@@ -313,7 +311,7 @@ export class StateDisplay {
     }
 
     followingPosition(player: Player, followingIndex: number) {
-        return player.followingPosition(this.state, followingIndex);
+        return extract(this.following(player, followingIndex), null, player => player.position, position => position);
     }
 
     export() {

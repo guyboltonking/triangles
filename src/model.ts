@@ -458,11 +458,15 @@ class State {
         this.boundingBox.set(boundingBox);
     }
 
-    addPlayer(position: Position): Player {
+    private static _addPlayer(players: Player[], position: Position) {
         let player = new Player(position);
-        player.id = this.players.length;
-        this.players.push(player);
+        player.id = players.length;
+        players.push(player);
         return player;
+    }
+
+    addPlayer(position: Position): Player {
+        return State._addPlayer(this.players, position);
     }
 
     deletePlayer(playerId: number) {
@@ -475,48 +479,63 @@ class State {
         this.calculateNewTargets(null);
     }
 
+    private static _follow(players: Player[], playerId: number,
+        followingIndex: number, followingPlayerId: number) {
+
+        players[playerId].follow(followingIndex, followingPlayerId);
+    }
+
     follow(playerId: number, followingIndex: number, followingPlayerId: number, update = true) {
-        this.players[playerId].follow(followingIndex, followingPlayerId);
+        State._follow(this.players, playerId, followingIndex, followingPlayerId);
         if (update) {
             this.calculateNewTargets(null);
         }
     }
 
     export(): string {
-        return JSON.stringify({
-            "players": this.players
-                .filter(player => player.active.value)
-                .map(player => {
-                    return {
-                        "id": player.id,
-                        "position": player.position.value,
-                        "following": player.getFollowingIds(),
-                    }
-                })
-        });
+        return JSON.stringify(
+            {
+                "players": this.players
+                    .filter(player => player.active.value)
+                    .map(player => {
+                        return {
+                            "id": player.id,
+                            "position": player.position.value,
+                            "following": player.getFollowingIds(),
+                        }
+                    })
+            },
+            null,
+            2
+        );
     }
 
     import(json: string) {
         let playerObjs = JSON.parse(json)["players"];
-        this.players.length = 0;
+        let players: Player[] = [];
+
         playerObjs.sort((a, b) => a.id - b.id);
 
         let nextPlayerId = 0;
         for (let playerObj of playerObjs) {
             while (nextPlayerId !== playerObj.id) {
-                let player = this.addPlayer(new Position(0, 0));
+                let player = State._addPlayer(players, new Position(0, 0));
                 player.active.set(false);
                 ++nextPlayerId;
             }
-            this.addPlayer(new Position(...playerObj.position as [number, number]));
+            State._addPlayer(players,
+                new Position(...playerObj.position as [number, number]));
             ++nextPlayerId;
         }
 
         for (let playerObj of playerObjs) {
-            this.follow(playerObj.id, 0, playerObj.following[0], false);
-            this.follow(playerObj.id, 1, playerObj.following[1], false);
+            State._follow(players, playerObj.id, 0, playerObj.following[0]);
+            State._follow(players, playerObj.id, 1, playerObj.following[1]);
         }
 
+        // We've got here; everything must be good, so assign the new players
+        // and recalculate targets.
+        this.players = players;
         this.calculateNewTargets(null);
     }
 }

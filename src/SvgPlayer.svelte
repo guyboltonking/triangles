@@ -34,7 +34,10 @@
         isMoving = player.isMoving;
         active = player.active;
         historyPoints = derived(player.history, (history) =>
-            history.map((pos) => `${pos.x},${pos.y}`).join(" ")
+            history
+                .toArray()
+                .map((pos) => `${pos.x},${pos.y}`)
+                .join(" ")
         );
 
         followingPosition0 = state.followingPosition(player, 0);

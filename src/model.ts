@@ -1,3 +1,4 @@
+import Denque from "denque";
 import { derived, writable, type Readable, type Subscriber, type Updater, type Writable } from "svelte/store";
 import { extract, Subscriptions } from "./store";
 
@@ -43,7 +44,7 @@ export class Player {
     speed: WritableValue<number> = new WritableValue(1);
     active = new WritableValue(true);
 
-    history: Writable<Position[]> = writable([]);
+    history: Writable<Denque<Position>> = writable(new Denque());
 
     getFollowingIds(): [number, number] {
         return this._following.map(id => id.value) as [number, number];
@@ -384,6 +385,7 @@ const SIN60 = Math.sin(Math.PI / 3);
 
 class State {
     players: Player[] = [];
+    historyLength = new WritableValue(2000);
     boundingBox: Writable<BoundingBox> = writable(null);
 
     // Return a tuple of [preferred-target, other-target]
@@ -451,6 +453,11 @@ class State {
                 }
                 player.history.update(history => {
                     history.push(player.position.value);
+
+                    while (history.size() > this.historyLength.value) {
+                        history.shift();
+                    }
+
                     return history;
                 });
             }

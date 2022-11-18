@@ -43,13 +43,7 @@ export class Player {
     speed: WritableValue<number> = new WritableValue(1);
     active = new WritableValue(true);
 
-    private _history: Position[] = [];
-    history: Readable<Position[]> = derived(this.position, position => {
-        if (position != null) {
-            this._history.push(position);
-        }
-        return this._history;
-    }, this._history);
+    history: Writable<Position[]> = writable([]);
 
     getFollowingIds(): [number, number] {
         return this._following.map(id => id.value) as [number, number];
@@ -455,6 +449,10 @@ class State {
                 else {
                     player.position.set(player.target.value);
                 }
+                player.history.update(history => {
+                    history.push(player.position.value);
+                    return history;
+                });
             }
             if (player.active.value) {
                 boundingBox?.expand(player.position.value);

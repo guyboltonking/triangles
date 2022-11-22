@@ -1,0 +1,63 @@
+:root {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-flow: column nowrap;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#app {
+  flex: 1 1 auto;
+  display: flex;
+  flex-flow: column nowrap;
+
+  #controls {
+    flex: 0 0 auto;
+
+    #playerEditor {
+      overflow: hidden;
+      display: inline;
+
+      #selectedPlayer {
+        overflow: hidden;
+        display: inline;
+        border-left: 1px solid black;
+        padding-left: 1em;
+        margin-left: 1em;
+      }
+    }
+  }
+
+  #display {
+    flex: 1 1 auto;
+    display: flex;
+    flex-flow: column nowrap;
+
+    svg {
+      /* Don't use auto for the flex-basis: it causes the svg to grow in
+    height to suit the aspect ration of the viewBox, causing a nasty
+    constantly resized svg. */
+      flex: 1 1 0;
+      border: solid black 1px;
+      /* Prevent text selection */
+      user-select: none;
+    }
+  }
+}

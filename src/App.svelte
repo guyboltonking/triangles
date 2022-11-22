@@ -91,14 +91,8 @@
   <PlayerEditor {controller} {editingState} />
 </div>
 
-<Playfield id="display" {state} {controller} {editingState} />
+<Playfield {state} {controller} {editingState} />
 
 {#if showPlayerTextEditor}
   <PlayerTextEditor on:close={() => (showPlayerTextEditor = false)} {state} />
 {/if}
-
-<style>
-  #controls {
-    overflow: hidden;
-  }
-</style>

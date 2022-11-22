@@ -23,51 +23,44 @@
     $: controller.setMode(editorMode);
 </script>
 
-<label>
-    <input
-        type="radio"
-        bind:group={editorMode}
-        name="editor"
-        value={EditorMode.MODIFY}
-    />
-    Modify
-</label>
+<div id="playerEditor">
+    <label>
+        <input
+            type="radio"
+            bind:group={editorMode}
+            name="editor"
+            value={EditorMode.MODIFY}
+        />
+        Modify
+    </label>
 
-<label>
-    <input
-        type="radio"
-        bind:group={editorMode}
-        name="editor"
-        value={EditorMode.ADD}
-    />
-    Add
-</label>
+    <label>
+        <input
+            type="radio"
+            bind:group={editorMode}
+            name="editor"
+            value={EditorMode.ADD}
+        />
+        Add
+    </label>
 
-<label>
-    <input
-        type="radio"
-        bind:group={editorMode}
-        name="editor"
-        value={EditorMode.DELETE}
-    />
-    Delete
-</label>
+    <label>
+        <input
+            type="radio"
+            bind:group={editorMode}
+            name="editor"
+            value={EditorMode.DELETE}
+        />
+        Delete
+    </label>
 
-<div class="selectedPlayer">
-    {#if $selectedPlayer}
-        Player {$selectedPlayer.id}: ({trunc($position.x)}, {trunc(
-            $position.y
-        )}) Speed: <input bind:value={$speed} />
-    {:else}
-        &nbsp;
-    {/if}
+    <div id="selectedPlayer">
+        {#if $selectedPlayer}
+            Player {$selectedPlayer.id}: ({trunc($position.x)}, {trunc(
+                $position.y
+            )}) Speed: <input bind:value={$speed} />
+        {:else}
+            &nbsp;
+        {/if}
+    </div>
 </div>
-
-<style>
-    .selectedPlayer {
-        display: inline;
-        border-left: 1px solid black;
-        padding-left: 1em;
-        margin-left: 1em;
-    }
-</style>

@@ -7,7 +7,6 @@
     import type { EditingState } from "./view";
 
     export let state: StateDisplay;
-    export let id: string;
     export let controller: EditController;
     export let editingState: EditingState;
 
@@ -52,7 +51,7 @@
     controller.setDomPositionToModelPosition(domPositionToModelPosition);
 </script>
 
-<div {id} bind:this={display}>
+<div id="display" bind:this={display}>
     <svg
         bind:this={svg}
         viewBox="{$viewBox.x} {$viewBox.y} {$viewBox.width} {$viewBox.height}"
@@ -123,19 +122,3 @@
         {/each}
     </svg>
 </div>
-
-<style>
-    div {
-        display: flex;
-        flex-flow: column nowrap;
-    }
-    svg {
-        /* Don't use auto for the flex-basis: it causes the svg to grow in
-        height to suit the aspect ration of the viewBox, causing a nasty
-        constantly resized svg. */
-        flex: 1 1 0;
-        border: solid black 1px;
-        /* Prevent text selection */
-        user-select: none;
-    }
-</style>

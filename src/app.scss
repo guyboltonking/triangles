@@ -23,24 +23,69 @@ body {
   min-height: 100vh;
 }
 
+%control-container {
+  display: flex;
+  flex-flow: row wrap;
+  column-gap: 1em;
+  row-gap: 1ex;
+  align-items: center;
+
+  >* {
+    flex: 0 1 auto;
+  }
+}
+
+.control-group {
+  @extend %control-container;
+}
+
+.control {
+  @extend %control-container;
+  column-gap: 0.5em;
+}
+
 #app {
   flex: 1 1 auto;
+
   display: flex;
   flex-flow: column nowrap;
 
   #controls {
-    flex: 0 0 auto;
+    flex: 0 1 content;
+    margin: 0.5ex;
+
+    #play {
+      width: 2em;
+    }
+
+    #zoom {
+      width: 12em;
+    }
+
+    #fps {
+      width: 4em;
+    }
 
     #playerEditor {
-      overflow: hidden;
-      display: inline;
+      align-self: stretch;
+      padding: 0 0.5em;
 
       #selectedPlayer {
-        overflow: hidden;
-        display: inline;
-        border-left: 1px solid black;
-        padding-left: 1em;
-        margin-left: 1em;
+        align-self: stretch;
+
+        .id {
+          width: 4em;
+        }
+
+        .position.control {
+          text-align: right;
+          column-gap: 0;
+
+          .coordinate {
+            display: inline;
+            width: 3em;
+          }
+        }
       }
     }
   }

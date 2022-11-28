@@ -23,42 +23,54 @@
     $: controller.setMode(editorMode);
 </script>
 
-<div id="playerEditor">
-    <label>
-        <input
-            type="radio"
-            bind:group={editorMode}
-            name="editor"
-            value={EditorMode.MODIFY}
-        />
-        Modify
-    </label>
+<div id="playerEditor" class="control-group">
+    <div id="editorMode" class="control">
+        <label>
+            <input
+                type="radio"
+                bind:group={editorMode}
+                name="editor"
+                value={EditorMode.MODIFY}
+            />
+            Modify
+        </label>
 
-    <label>
-        <input
-            type="radio"
-            bind:group={editorMode}
-            name="editor"
-            value={EditorMode.ADD}
-        />
-        Add
-    </label>
+        <label>
+            <input
+                type="radio"
+                bind:group={editorMode}
+                name="editor"
+                value={EditorMode.ADD}
+            />
+            Add
+        </label>
 
-    <label>
-        <input
-            type="radio"
-            bind:group={editorMode}
-            name="editor"
-            value={EditorMode.DELETE}
-        />
-        Delete
-    </label>
+        <label>
+            <input
+                type="radio"
+                bind:group={editorMode}
+                name="editor"
+                value={EditorMode.DELETE}
+            />
+            Delete
+        </label>
+    </div>
 
-    <div id="selectedPlayer">
+    <div id="selectedPlayer" class="control">
         {#if $selectedPlayer}
-            Player {$selectedPlayer.id}: ({trunc($position.x)}, {trunc(
-                $position.y
-            )}) Speed: <input bind:value={$speed} />
+            <div class="id">Player {$selectedPlayer.id}:</div>
+            <div class="position control">
+                <div class="coordinate">
+                    {trunc($position.x)}
+                </div>
+                ,
+                <div class="coordinate">
+                    {trunc($position.y)}
+                </div>
+            </div>
+            <div class="speed">
+                <label>Speed <input bind:value={$speed} /></label>
+            </div>
         {:else}
             &nbsp;
         {/if}

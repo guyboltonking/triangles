@@ -76,18 +76,23 @@
   }
 </script>
 
-<div id="controls">
-  <button on:click={togglePause}>
+<div id="controls" class="control-group">
+  <button id="play" on:click={togglePause}>
     {#if running}⏸{:else}▶️{/if}
   </button>
   <button on:click={editPlayers}> Edit </button>
-  Zoom:
-  <select bind:value={$zoomMode}>
-    <option value={ZoomMode.SCREEN}>Screen</option>
-    <option value={ZoomMode.PLAYERS}>Players</option>
-  </select>
-  {zoom}
-  {#if running}FPS: {fps}{/if}
+  <div id="zoom" class="control-group">
+    Zoom:
+    <select bind:value={$zoomMode}>
+      <option value={ZoomMode.SCREEN}>Screen</option>
+      <option value={ZoomMode.PLAYERS}>Players</option>
+    </select>
+    {zoom}
+  </div>
+  <div id="fps" class="control-group">
+    {#if running}FPS: {fps}{/if}
+  </div>
+
   <PlayerEditor {controller} {editingState} />
 </div>
 

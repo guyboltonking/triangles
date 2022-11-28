@@ -50,20 +50,21 @@ body {
   display: flex;
   flex-flow: column nowrap;
 
+
   #controls {
     flex: 0 1 content;
     margin: 0.5ex;
 
-    #play {
-      width: 2em;
+    .input-group {
+      width: auto;
     }
 
-    #zoom {
-      width: 12em;
-    }
-
-    #fps {
+    #zoomValue {
       width: 4em;
+    }
+
+    #fps>input {
+      width: 3em;
     }
 
     #playerEditor {

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { Button, Icon, Input, InputGroup, InputGroupText } from "sveltestrap";
   import { EditController } from "./controller.js";
   import { createStateDisplay, ZoomMode } from "./model.js";
   import PlayerEditor from "./PlayerEditor.svelte";
   import PlayerTextEditor from "./PlayerTextEditor.svelte";
   import Playfield from "./Playfield.svelte";
+  import { buttonSize, inputSize } from "./style.js";
   import { EditingState } from "./view.js";
 
   let lastLoopTimestamp = 0;
@@ -77,21 +79,38 @@
 </script>
 
 <div id="controls" class="control-group">
-  <button id="play" on:click={togglePause}>
-    {#if running}⏸{:else}▶️{/if}
-  </button>
-  <button on:click={editPlayers}> Edit </button>
-  <div id="zoom" class="control-group">
-    Zoom:
-    <select bind:value={$zoomMode}>
+  <Button
+    size={buttonSize}
+    color="primary"
+    id="play"
+    on:click={togglePause}
+    title="Play/Pause"
+  >
+    {#if running}<Icon name="pause-fill" />{:else}<Icon name="play-fill" />{/if}
+  </Button>
+
+  <Button
+    size={buttonSize}
+    color="secondary"
+    on:click={editPlayers}
+    title="Edit"
+  >
+    <Icon name="pencil-square" />
+  </Button>
+
+  <InputGroup size={inputSize} id="zoom">
+    <InputGroupText for="zoomMode">Zoom</InputGroupText>
+    <Input type="select" id="zoomMode" bind:value={$zoomMode}>
       <option value={ZoomMode.SCREEN}>Screen</option>
       <option value={ZoomMode.PLAYERS}>Players</option>
-    </select>
-    {zoom}
-  </div>
-  <div id="fps" class="control-group">
-    {#if running}FPS: {fps}{/if}
-  </div>
+    </Input>
+    <InputGroupText id="zoomValue">{zoom}</InputGroupText>
+  </InputGroup>
+
+  <InputGroup size={inputSize} id="fps">
+    <InputGroupText>FPS</InputGroupText>
+    <Input type="text" bind:value={fps} disabled />
+  </InputGroup>
 
   <PlayerEditor {controller} {editingState} />
 </div>

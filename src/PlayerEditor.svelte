@@ -24,34 +24,38 @@
 </script>
 
 <div id="playerEditor" class="control-group">
-    <div id="editorMode" class="control">
-        <label>
-            <input
-                type="radio"
-                bind:group={editorMode}
-                name="editor"
-                value={EditorMode.MODIFY}
-            />
+    <div class="btn-group" role="group">
+        <input
+            id="editorModeModify"
+            class="btn-check"
+            type="radio"
+            bind:group={editorMode}
+            name="editor"
+            value={EditorMode.MODIFY}
+        />
+        <label class="btn btn-outline-primary" for="editorModeModify">
             Modify
         </label>
 
-        <label>
-            <input
-                type="radio"
-                bind:group={editorMode}
-                name="editor"
-                value={EditorMode.ADD}
-            />
-            Add
-        </label>
+        <input
+            id="editorModeAdd"
+            class="btn-check"
+            type="radio"
+            bind:group={editorMode}
+            name="editor"
+            value={EditorMode.ADD}
+        />
+        <label class="btn btn-outline-primary" for="editorModeAdd"> Add </label>
 
-        <label>
-            <input
-                type="radio"
-                bind:group={editorMode}
-                name="editor"
-                value={EditorMode.DELETE}
-            />
+        <input
+            id="editorModeDelete"
+            class="btn-check"
+            type="radio"
+            bind:group={editorMode}
+            name="editor"
+            value={EditorMode.DELETE}
+        />
+        <label class="btn btn-outline-primary" for="editorModeDelete">
             Delete
         </label>
     </div>

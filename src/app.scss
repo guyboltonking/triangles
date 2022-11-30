@@ -74,11 +74,11 @@ body {
       #selectedPlayer {
         align-self: stretch;
 
-        .id {
-          width: 4em;
-        }
+        // .id {
+        //   width: 4em;
+        // }
 
-        .position.control {
+        .position {
           text-align: right;
           column-gap: 0;
 

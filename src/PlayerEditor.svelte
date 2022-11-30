@@ -61,10 +61,12 @@
         </label>
     </div>
 
-    <div id="selectedPlayer" class="control">
+    <div id="selectedPlayer" class={bootstrapSizeClass("input-group")}>
         {#if $selectedPlayer}
-            <div class="id">Player {$selectedPlayer.id}:</div>
-            <div class="position control">
+            <span class="input-group-text id">
+                Player {$selectedPlayer.id}:
+            </span>
+            <span class="input-group-text position">
                 <div class="coordinate">
                     {trunc($position.x)}
                 </div>
@@ -72,10 +74,9 @@
                 <div class="coordinate">
                     {trunc($position.y)}
                 </div>
-            </div>
-            <div class="speed">
-                <label>Speed <input bind:value={$speed} /></label>
-            </div>
+            </span>
+            <span class="input-group-text speed">Speed</span>
+            <input class="form-control" bind:value={$speed} />
         {:else}
             &nbsp;
         {/if}

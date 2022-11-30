@@ -107,12 +107,12 @@
       <option value={ZoomMode.SCREEN}>Screen</option>
       <option value={ZoomMode.PLAYERS}>Players</option>
     </select>
-    <span class="input-group-text" id="zoomValue">{zoom}</span>
+    <span class="input-group-text value" id="zoomValue">{zoom}</span>
   </div>
 
   <div class={bootstrapSizeClass("input-group")} id="fps">
     <span class="input-group-text label">FPS</span>
-    <input class="form-control" type="text" bind:value={fps} disabled />
+    <input class="form-control value" type="text" bind:value={fps} disabled />
   </div>
 
   <PlayerEditor {controller} {editingState} />

@@ -66,11 +66,11 @@
             Player {$selectedPlayer.id}
         </span>
         <span class="input-group-text position">
-            <div class="coordinate">
+            <div class="coordinate value">
                 {trunc($position.x)}
             </div>
             ,
-            <div class="coordinate">
+            <div class="coordinate value">
                 {trunc($position.y)}
             </div>
         </span>
@@ -82,7 +82,7 @@
             class="form-range form-control"
             bind:value={$speed}
         />
-        <span class="input-group-text">{$speed}</span>
+        <span class="input-group-text value">{$speed}</span>
     {:else}
         <span class="input-group-text label" style="visibility: hidden">
             No player selected

@@ -90,6 +90,11 @@ body {
       //color: white;
     }
 
+    .value {
+      font-family: var(--bs-font-monospace);
+
+    }
+
     .form-range {
       height: inherit;
     }
@@ -105,7 +110,7 @@ body {
     height to suit the aspect ration of the viewBox, causing a nasty
     constantly resized svg. */
       flex: 1 1 0;
-      border: solid black 1px;
+      border: solid var(--bs-dark) 1px;
       /* Prevent text selection */
       user-select: none;
     }

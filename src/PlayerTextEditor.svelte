@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import type { StateDisplay } from "./model";
+    import { bootstrapSizeClass } from "./style";
 
     export let state: StateDisplay;
     let json = state.export();
@@ -17,10 +18,17 @@
 </script>
 
 <div class="text-editor">
-    <textarea bind:value={json} />
-    <div class="controls">
-        <button on:click={cancel}>Cancel</button>
-        <button on:click={save}>Save</button>
+    <textarea class={bootstrapSizeClass("form-control")} bind:value={json} />
+    <div class="control-group">
+        <button
+            class="{bootstrapSizeClass('btn')} btn-secondary"
+            on:click={cancel}
+        >
+            Cancel
+        </button>
+        <button class="{bootstrapSizeClass('btn')} btn-primary" on:click={save}>
+            Save
+        </button>
     </div>
 </div>
 
@@ -29,7 +37,9 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        background-color: white;
+        padding: 1ex;
+        z-index: 100;
+        background-color: var(--bs-light);
         display: flex;
         flex-flow: column nowrap;
     }
@@ -38,11 +48,11 @@
         flex: 1 1 0;
         resize: none;
         overflow: auto;
+        font-family: var(--bs-font-monospace);
     }
 
-    .controls {
-        display: flex;
-        flex-direction: row;
+    .control-group {
         justify-content: flex-end;
+        margin-top: 1ex;
     }
 </style>

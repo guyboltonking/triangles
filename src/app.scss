@@ -67,25 +67,15 @@ body {
       width: 3em;
     }
 
-    #playerEditor {
-      align-self: stretch;
-      padding: 0 0.5em;
+    #selectedPlayer {
 
-      #selectedPlayer {
-        align-self: stretch;
+      .position {
+        text-align: right;
+        column-gap: 0;
 
-        // .id {
-        //   width: 4em;
-        // }
-
-        .position {
-          text-align: right;
-          column-gap: 0;
-
-          .coordinate {
-            display: inline;
-            width: 3em;
-          }
+        .coordinate {
+          display: inline;
+          width: 3em;
         }
       }
     }

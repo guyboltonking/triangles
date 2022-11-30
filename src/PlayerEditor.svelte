@@ -24,61 +24,59 @@
     $: controller.setMode(editorMode);
 </script>
 
-<div id="playerEditor" class="control-group">
-    <div class={bootstrapSizeClass("btn-group")} role="group">
-        <input
-            id="editorModeModify"
-            class="btn-check"
-            type="radio"
-            bind:group={editorMode}
-            name="editor"
-            value={EditorMode.MODIFY}
-        />
-        <label class="btn btn-outline-primary" for="editorModeModify">
-            Modify
-        </label>
+<div class={bootstrapSizeClass("btn-group")} role="group">
+    <input
+        id="editorModeModify"
+        class="btn-check"
+        type="radio"
+        bind:group={editorMode}
+        name="editor"
+        value={EditorMode.MODIFY}
+    />
+    <label class="btn btn-outline-primary" for="editorModeModify">
+        Modify
+    </label>
 
-        <input
-            id="editorModeAdd"
-            class="btn-check"
-            type="radio"
-            bind:group={editorMode}
-            name="editor"
-            value={EditorMode.ADD}
-        />
-        <label class="btn btn-outline-primary" for="editorModeAdd"> Add </label>
+    <input
+        id="editorModeAdd"
+        class="btn-check"
+        type="radio"
+        bind:group={editorMode}
+        name="editor"
+        value={EditorMode.ADD}
+    />
+    <label class="btn btn-outline-primary" for="editorModeAdd"> Add </label>
 
-        <input
-            id="editorModeDelete"
-            class="btn-check"
-            type="radio"
-            bind:group={editorMode}
-            name="editor"
-            value={EditorMode.DELETE}
-        />
-        <label class="btn btn-outline-primary" for="editorModeDelete">
-            Delete
-        </label>
-    </div>
+    <input
+        id="editorModeDelete"
+        class="btn-check"
+        type="radio"
+        bind:group={editorMode}
+        name="editor"
+        value={EditorMode.DELETE}
+    />
+    <label class="btn btn-outline-primary" for="editorModeDelete">
+        Delete
+    </label>
+</div>
 
-    <div id="selectedPlayer" class={bootstrapSizeClass("input-group")}>
-        {#if $selectedPlayer}
-            <span class="input-group-text id">
-                Player {$selectedPlayer.id}:
-            </span>
-            <span class="input-group-text position">
-                <div class="coordinate">
-                    {trunc($position.x)}
-                </div>
-                ,
-                <div class="coordinate">
-                    {trunc($position.y)}
-                </div>
-            </span>
-            <span class="input-group-text speed">Speed</span>
-            <input class="form-control" bind:value={$speed} />
-        {:else}
-            &nbsp;
-        {/if}
-    </div>
+<div id="selectedPlayer" class={bootstrapSizeClass("input-group")}>
+    {#if $selectedPlayer}
+        <span class="input-group-text id">
+            Player {$selectedPlayer.id}:
+        </span>
+        <span class="input-group-text position">
+            <div class="coordinate">
+                {trunc($position.x)}
+            </div>
+            ,
+            <div class="coordinate">
+                {trunc($position.y)}
+            </div>
+        </span>
+        <span class="input-group-text speed">Speed</span>
+        <input class="form-control" bind:value={$speed} />
+    {:else}
+        &nbsp;
+    {/if}
 </div>

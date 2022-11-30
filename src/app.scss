@@ -68,6 +68,8 @@ body {
     }
 
     #selectedPlayer {
+      width: 24em;
+      flex-wrap: nowrap;
 
       .position {
         text-align: right;

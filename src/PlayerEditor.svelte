@@ -84,6 +84,8 @@
         />
         <span class="input-group-text">{$speed}</span>
     {:else}
-        &nbsp;
+        <span class="input-group-text" style="visibility: hidden">
+            No player selected
+        </span>
     {/if}
 </div>

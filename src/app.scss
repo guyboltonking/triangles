@@ -83,8 +83,16 @@ body {
     }
   }
 
-  .input-group .form-range {
-    height: inherit;
+  .input-group {
+    .label {
+      //font-weight: bold;
+      background-color: #ced4da;
+      //color: white;
+    }
+
+    .form-range {
+      height: inherit;
+    }
   }
 
   #display {

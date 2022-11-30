@@ -102,7 +102,7 @@
   </button>
 
   <div class={bootstrapSizeClass("input-group")} id="zoom">
-    <span class="input-group-text">Zoom</span>
+    <span class="input-group-text label">Zoom</span>
     <select class="form-select" id="zoomMode" bind:value={$zoomMode}>
       <option value={ZoomMode.SCREEN}>Screen</option>
       <option value={ZoomMode.PLAYERS}>Players</option>
@@ -111,7 +111,7 @@
   </div>
 
   <div class={bootstrapSizeClass("input-group")} id="fps">
-    <span class="input-group-text">FPS</span>
+    <span class="input-group-text label">FPS</span>
     <input class="form-control" type="text" bind:value={fps} disabled />
   </div>
 

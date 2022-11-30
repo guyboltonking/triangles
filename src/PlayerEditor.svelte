@@ -62,8 +62,8 @@
 
 <div id="selectedPlayer" class={bootstrapSizeClass("input-group")}>
     {#if $selectedPlayer}
-        <span class="input-group-text">
-            Player {$selectedPlayer.id}:
+        <span class="input-group-text label">
+            Player {$selectedPlayer.id}
         </span>
         <span class="input-group-text position">
             <div class="coordinate">
@@ -74,7 +74,7 @@
                 {trunc($position.y)}
             </div>
         </span>
-        <span class="input-group-text">Speed</span>
+        <span class="input-group-text label">Speed</span>
         <input
             type="range"
             min="1"
@@ -84,7 +84,7 @@
         />
         <span class="input-group-text">{$speed}</span>
     {:else}
-        <span class="input-group-text" style="visibility: hidden">
+        <span class="input-group-text label" style="visibility: hidden">
             No player selected
         </span>
     {/if}

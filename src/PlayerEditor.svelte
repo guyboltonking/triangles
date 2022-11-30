@@ -2,6 +2,7 @@
     import type { Readable, Writable } from "svelte/store";
     import { EditController, EditorMode } from "./controller";
     import { trunc, type Position } from "./model";
+    import { bootstrapSizeClass } from "./style";
     import type { EditingState } from "./view";
 
     export let controller: EditController;
@@ -24,7 +25,7 @@
 </script>
 
 <div id="playerEditor" class="control-group">
-    <div class="btn-group" role="group">
+    <div class={bootstrapSizeClass("btn-group")} role="group">
         <input
             id="editorModeModify"
             class="btn-check"

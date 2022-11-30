@@ -23,7 +23,6 @@
   "dependencies": {
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.10.2",
-    "denque": "^2.1.0",
-    "sveltestrap": "^5.10.0"
+    "denque": "^2.1.0"
   }
 }

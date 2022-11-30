@@ -1,12 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Button, Icon, Input, InputGroup, InputGroupText } from "sveltestrap";
   import { EditController } from "./controller.js";
   import { createStateDisplay, ZoomMode } from "./model.js";
   import PlayerEditor from "./PlayerEditor.svelte";
   import PlayerTextEditor from "./PlayerTextEditor.svelte";
   import Playfield from "./Playfield.svelte";
-  import { buttonSize, inputSize } from "./style.js";
+  import { bootstrapSizeClass } from "./style.js";
   import { EditingState } from "./view.js";
 
   let lastLoopTimestamp = 0;
@@ -79,38 +78,42 @@
 </script>
 
 <div id="controls" class="control-group">
-  <Button
-    size={buttonSize}
-    color="primary"
+  <button
+    type="button"
+    class="btn-primary {bootstrapSizeClass('btn')}"
     id="play"
     on:click={togglePause}
     title="Play/Pause"
   >
-    {#if running}<Icon name="pause-fill" />{:else}<Icon name="play-fill" />{/if}
-  </Button>
+    {#if running}
+      <i class="bi-pause-fill" />
+    {:else}
+      <i class="bi-play-fill" />
+    {/if}
+  </button>
 
-  <Button
-    size={buttonSize}
-    color="secondary"
+  <button
+    type="button"
+    class="btn-primary {bootstrapSizeClass('btn')}"
     on:click={editPlayers}
     title="Edit"
   >
-    <Icon name="pencil-square" />
-  </Button>
+    <i class="bi-pencil-square" />
+  </button>
 
-  <InputGroup size={inputSize} id="zoom">
-    <InputGroupText for="zoomMode">Zoom</InputGroupText>
-    <Input type="select" id="zoomMode" bind:value={$zoomMode}>
+  <div class={bootstrapSizeClass("input-group")} id="zoom">
+    <span class="input-group-text">Zoom</span>
+    <select class="form-select" id="zoomMode" bind:value={$zoomMode}>
       <option value={ZoomMode.SCREEN}>Screen</option>
       <option value={ZoomMode.PLAYERS}>Players</option>
-    </Input>
-    <InputGroupText id="zoomValue">{zoom}</InputGroupText>
-  </InputGroup>
+    </select>
+    <span class="input-group-text" id="zoomValue">{zoom}</span>
+  </div>
 
-  <InputGroup size={inputSize} id="fps">
-    <InputGroupText>FPS</InputGroupText>
-    <Input type="text" bind:value={fps} disabled />
-  </InputGroup>
+  <div class={bootstrapSizeClass("input-group")} id="fps">
+    <span class="input-group-text">FPS</span>
+    <input class="form-control" type="text" bind:value={fps} disabled />
+  </div>
 
   <PlayerEditor {controller} {editingState} />
 </div>

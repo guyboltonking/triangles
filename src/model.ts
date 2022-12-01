@@ -92,16 +92,16 @@ export class Player {
         return this.active.value && this._following.every(id => id.value != NO_PLAYER);
     }
 
-    isMovingRaw(active: boolean, target: Position, position: Position): boolean {
+    static isMovingRaw(active: boolean, target: Position, position: Position): boolean {
         return active &&
             target !== null &&
             !position.equals(target);
     }
 
     isMoving =
-        derived([this.active, this.target, this.position],
+        derived([this.active, this.perceivedTarget, this.position],
             ([active, target, position]) =>
-                this.isMovingRaw(active, target, position));
+                Player.isMovingRaw(active, target, position));
 
     constructor(position: Position) {
         this.position.set(position);
@@ -258,13 +258,6 @@ export class StateDisplay {
     private players_: Writable<Player[]> = writable(null);
     players: Readable<Player[]> = this.players_;
 
-    finished: Readable<boolean> = derived(this.anyPlayerChangedStore, () =>
-        this.state.players.every(player =>
-            !player.isMovingRaw(
-                player.active.value,
-                player.target.value,
-                player.position.value)));
-
     private updatePlayerStores() {
         this.players_.set(this.state.players);
         this.anyPlayerChangedStore.trigger();
@@ -278,8 +271,12 @@ export class StateDisplay {
 
     private state: State;
 
+    finished: Readable<boolean>;
+
     constructor(state: State) {
         this.state = state;
+        this.finished = derived(state.moving,
+            moving => !moving);
         this.viewBox = derived([
             this.dimensions, this.margin,
             this.zoomMode, this.state.boundingBox
@@ -394,6 +391,7 @@ class State {
     players: Player[] = [];
     historyLength = new WritableValue(2000);
     boundingBox: Writable<BoundingBox> = writable(null);
+    moving: Writable<Boolean> = writable(true);
 
     // Return a tuple of [preferred-target, other-target]
     private static calculateTargets(player: Position, a: Position, b: Position): [Position, Position] {
@@ -502,10 +500,19 @@ class State {
         }
     }
 
+    private calculateMoving() {
+        this.moving.set(
+            this.players.some(player => Player.isMovingRaw(
+                player.active.value,
+                player.perceivedTarget.value,
+                player.position.value)));
+    }
+
     update(elapsedMillis) {
         let boundingBox = new BoundingBox();
         this.calculateNewTargets(boundingBox);
         this.calculateNewPositions(elapsedMillis, boundingBox);
+        this.calculateMoving();
         this.boundingBox.set(boundingBox);
     }
 
@@ -528,10 +535,12 @@ class State {
     setPosition(playerId: number, position: Position) {
         this.players[playerId].position.set(position);
         this.calculateNewTargets(null);
+        this.calculateMoving();
     }
 
     setReactionTime() {
         this.calculateNewTargets(null);
+        this.calculateMoving();
     }
 
     private static _follow(players: Player[], playerId: number,

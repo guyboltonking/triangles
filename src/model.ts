@@ -253,7 +253,6 @@ class Triggerable implements Readable<void> {
 }
 
 export class StateDisplay {
-
     private anyPlayerChangedStore: Triggerable = new Triggerable();
 
     private players_: Writable<Player[]> = writable(null);
@@ -314,6 +313,10 @@ export class StateDisplay {
 
     setPosition(playerId: number, position: Position) {
         this.state.setPosition(playerId, position);
+    }
+
+    setReactionTime() {
+        this.state.setReactionTime();
     }
 
     following(player: Player, followingIndex: number) {
@@ -524,6 +527,10 @@ class State {
 
     setPosition(playerId: number, position: Position) {
         this.players[playerId].position.set(position);
+        this.calculateNewTargets(null);
+    }
+
+    setReactionTime() {
         this.calculateNewTargets(null);
     }
 

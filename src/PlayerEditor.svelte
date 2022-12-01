@@ -11,15 +11,21 @@
     let position: Readable<Position> = null;
     let speed: Writable<number> = null;
     let reactionTime: Writable<number> = null;
+    let reactionTimeUnsubscribe = () => {};
 
     $: if ($selectedPlayer != null) {
         position = $selectedPlayer.position;
         speed = $selectedPlayer.speed;
         reactionTime = $selectedPlayer.reactionTime;
+        reactionTimeUnsubscribe = reactionTime.subscribe(() =>
+            controller.setReactionTime()
+        );
     } else {
         position = null;
         speed = null;
         reactionTime = null;
+        reactionTimeUnsubscribe();
+        reactionTimeUnsubscribe = () => {};
     }
 
     let editorMode: EditorMode = EditorMode.MODIFY;

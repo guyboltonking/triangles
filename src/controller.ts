@@ -329,10 +329,12 @@ export class EditController {
     private dragEditController: DragEditController;
     private dragAdaptor: DragAdaptor;
     private domPositionToModelPosition: (event: MouseEvent) => Position;
+    private editingState: EditingState;
 
     constructor(editingState: EditingState) {
         this.dragEditController = new DragEditController(editingState);
         this.dragAdaptor = new DragAdaptor(this.dragEditController);
+        this.editingState = editingState;
     }
 
     // Urgh, two-phase construction
@@ -374,5 +376,9 @@ export class EditController {
 
     mouseMove(player: Player, event: MouseEvent) {
         this.dragAdaptor.mouseMove(player, this.domPositionToModelPosition(event));
+    }
+
+    setReactionTime() {
+        this.editingState.setReactionTime();
     }
 }

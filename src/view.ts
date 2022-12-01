@@ -71,6 +71,10 @@ export class EditingState {
         this.state.setPosition(player.id, position)
     }
 
+    setReactionTime() {
+        this.state.setReactionTime();
+    }
+
     add(position: Position) {
         this.startEditing(this.state.addPlayer(position));
     }

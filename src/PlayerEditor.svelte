@@ -77,8 +77,9 @@
         <span class="input-group-text label">Speed</span>
         <input
             type="range"
-            min="1"
+            min="0.5"
             max="10"
+            step="0.5"
             class="form-range form-control"
             bind:value={$speed}
         />

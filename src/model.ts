@@ -41,7 +41,7 @@ export class Player {
     ];
     position: WritableValue<Position> = new WritableValue(null);
     target: WritableValue<Position> = new WritableValue(null);
-    speed: WritableValue<number> = new WritableValue(1);
+    speed: WritableValue<number> = new WritableValue(0.5);
     reactionTime: WritableValue<number> = new WritableValue(0);
     active = new WritableValue(true);
 
@@ -285,12 +285,12 @@ export class StateDisplay {
             StateDisplay.calculateViewBox(
                 dimensions, margin, zoomMode, boundingBox));
         this.updatePlayerStores();
-        this.state.update();
+        this.state.update(0);
         this.anyPlayerChangedStore.trigger();
     }
 
-    updatePositions(): StateDisplay {
-        this.state.update();
+    updatePositions(elapsedMillis): StateDisplay {
+        this.state.update(elapsedMillis);
         this.anyPlayerChangedStore.trigger();
         return this;
     }
@@ -438,16 +438,17 @@ class State {
         }
     }
 
-    private calculateNewPositions(boundingBox: BoundingBox) {
+    private calculateNewPositions(elapsedMillis: number, boundingBox: BoundingBox) {
         for (const player of this.players) {
             if (player.target.value != null) {
                 const targetVector =
                     Vector.between(player.position.value, player.target.value);
-                if (targetVector.distance() > player.speed.value) {
+                // All coordinate units are cm; speed is m/s
+                let distance = player.speed.value * elapsedMillis / 10;
+                if (targetVector.distance() > distance) {
                     player.position.set(
                         player.position.value
-                            .add(targetVector.normalize().multiply(player.speed.value)));
-
+                            .add(targetVector.normalize().multiply(distance)));
                 }
                 else {
                     player.position.set(player.target.value);
@@ -468,10 +469,10 @@ class State {
         }
     }
 
-    update() {
+    update(elapsedMillis) {
         let boundingBox = new BoundingBox();
         this.calculateNewTargets(boundingBox);
-        this.calculateNewPositions(boundingBox);
+        this.calculateNewPositions(elapsedMillis, boundingBox);
         this.boundingBox.set(boundingBox);
     }
 

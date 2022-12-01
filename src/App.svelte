@@ -29,13 +29,13 @@
   let fps = 0;
 
   function run() {
-    const loop = (timestamp) => {
+    const loop = (timestamp: DOMHighResTimeStamp) => {
       let elapsed = lastLoopTimestamp == -1 ? 0 : timestamp - lastLoopTimestamp;
       lastLoopTimestamp = timestamp;
       if (elapsed != 0) {
         fps = Math.floor(1000 / elapsed);
+        state.updatePositions(elapsed);
       }
-      state.updatePositions();
       frameCallbackId = requestAnimationFrame(loop);
     };
     loop(lastLoopTimestamp);
@@ -50,7 +50,7 @@
   }
 
   onMount(() => {
-    state.updatePositions();
+    state.updatePositions(0);
     run();
     return () => stop();
   });

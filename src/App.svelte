@@ -119,7 +119,14 @@
 
   <PlayerEditor {controller} {editingState} />
 </div>
-
+<div id="credits">
+  <a
+    class="badge bg-secondary"
+    href="https://github.com/guyboltonking/triangles"
+  >
+    <i class="bi-github" /><span>&nbsp;triangles</span>
+  </a>
+</div>
 <Playfield {state} {controller} {editingState} />
 
 {#if showPlayerTextEditor}

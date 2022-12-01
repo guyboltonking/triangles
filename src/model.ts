@@ -42,6 +42,7 @@ export class Player {
     position: WritableValue<Position> = new WritableValue(null);
     target: WritableValue<Position> = new WritableValue(null);
     speed: WritableValue<number> = new WritableValue(1);
+    reactionTime: WritableValue<number> = new WritableValue(0);
     active = new WritableValue(true);
 
     history: Writable<Denque<Position>> = writable(new Denque());

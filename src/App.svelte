@@ -8,9 +8,6 @@
   import { bootstrapSizeClass } from "./style.js";
   import { EditingState } from "./view.js";
 
-  let lastLoopTimestamp = 0;
-  let fps = "0";
-
   let frameCallbackId: number;
   let running: boolean = true;
 
@@ -28,12 +25,15 @@
   let zoom: string;
   $: zoom = $viewBox.zoom.toFixed(2);
 
+  let lastLoopTimestamp = -1;
+  let fps = 0;
+
   function run() {
     const loop = (timestamp) => {
-      let elapsed = timestamp - lastLoopTimestamp;
+      let elapsed = lastLoopTimestamp == -1 ? 0 : timestamp - lastLoopTimestamp;
       lastLoopTimestamp = timestamp;
       if (elapsed != 0) {
-        fps = (1000 / elapsed).toFixed();
+        fps = Math.floor(1000 / elapsed);
       }
       state.updatePositions();
       frameCallbackId = requestAnimationFrame(loop);
@@ -44,6 +44,8 @@
 
   function stop() {
     cancelAnimationFrame(frameCallbackId);
+    lastLoopTimestamp = -1;
+    fps = 0;
     running = false;
   }
 

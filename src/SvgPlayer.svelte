@@ -23,6 +23,7 @@
     let followingPosition0: Readable<Position>;
     let followingPosition1: Readable<Position>;
     let target: Readable<Position>;
+    let perceivedTarget: Readable<Position>;
     let selected: Readable<boolean>;
     let selectable: Readable<boolean>;
     let following1: Readable<boolean>;
@@ -36,7 +37,7 @@
         historyPoints = derived(player.history, (history) =>
             history
                 .toArray()
-                .map((pos) => `${pos.x},${pos.y}`)
+                .map(([, pos]) => `${pos.x},${pos.y}`)
                 .join(" ")
         );
 
@@ -44,6 +45,7 @@
         followingPosition1 = state.followingPosition(player, 1);
 
         target = player.target;
+        perceivedTarget = player.perceivedTarget;
 
         selected = editingState.isSelected(player);
         selectable = editingState.isSelectable(player);
@@ -93,21 +95,26 @@
                 stroke-width="2"
             />
             {#if $isMoving}
-                <circle class="target" cx={$target.x} cy={$target.y} r="5" />
-                {#if Vector.between($position, $target).distance() > arrowWidth}
+                <circle
+                    class="target"
+                    cx={$perceivedTarget.x}
+                    cy={$perceivedTarget.y}
+                    r="5"
+                />
+                {#if Vector.between($position, $perceivedTarget).distance() > arrowWidth}
                     <line
                         class="target"
                         x1={$position.x}
                         y1={$position.y}
-                        x2={$target.x}
-                        y2={$target.y}
+                        x2={$perceivedTarget.x}
+                        y2={$perceivedTarget.y}
                         stroke-width="2"
                     />
                 {/if}
                 <text
                     class="target {selectedClass}"
-                    x={$target.x - TEXT_OFFSET * 2}
-                    y={$target.y - TEXT_OFFSET}>{player.id}</text
+                    x={$perceivedTarget.x - TEXT_OFFSET * 2}
+                    y={$perceivedTarget.y - TEXT_OFFSET}>{player.id}</text
                 >
             {/if}
         </g>

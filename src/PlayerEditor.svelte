@@ -10,13 +10,16 @@
     let selectedPlayer = editingState.selectedPlayer;
     let position: Readable<Position> = null;
     let speed: Writable<number> = null;
+    let reactionTime: Writable<number> = null;
 
     $: if ($selectedPlayer != null) {
         position = $selectedPlayer.position;
         speed = $selectedPlayer.speed;
+        reactionTime = $selectedPlayer.reactionTime;
     } else {
         position = null;
         speed = null;
+        reactionTime = null;
     }
 
     let editorMode: EditorMode = EditorMode.MODIFY;
@@ -84,6 +87,16 @@
             bind:value={$speed}
         />
         <span class="input-group-text value">{$speed}</span>
+        <span class="input-group-text label">Reaction Time</span>
+        <input
+            type="range"
+            min="0"
+            max="10"
+            step="1"
+            class="form-range form-control"
+            bind:value={$reactionTime}
+        />
+        <span class="input-group-text value">{$reactionTime}</span>
     {:else}
         <span class="input-group-text label" style="visibility: hidden">
             No player selected

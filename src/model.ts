@@ -43,9 +43,11 @@ export class Player {
     target: WritableValue<Position> = new WritableValue(null);
     speed: WritableValue<number> = new WritableValue(0.5);
     reactionTime: WritableValue<number> = new WritableValue(0);
+    perceivedTarget: WritableValue<Position> = new WritableValue(null)
     active = new WritableValue(true);
 
-    history: Writable<Denque<Position>> = writable(new Denque());
+    // List of [elapsedMillis, Position]
+    history: WritableValue<Denque<[number, Position]>> = new WritableValue(new Denque());
 
     getFollowingIds(): [number, number] {
         return this._following.map(id => id.value) as [number, number];
@@ -78,6 +80,7 @@ export class Player {
         }
         if (!this.isFollowing()) {
             this.target.set(null);
+            this.perceivedTarget.set(null);
         }
     }
 
@@ -421,6 +424,19 @@ class State {
                 [player, target1] : [target2, target1];
     }
 
+    private static getHistoricalPosition(player: Player, reactionTimeSeconds: number): Position {
+        let reactionTimeMillis = reactionTimeSeconds * 1000;
+        let timeInPast = 0;
+        let history = player.history.value;
+        let pos = player.position.value;
+        for (let i = 0; i != history.size() && timeInPast < reactionTimeMillis; ++i) {
+            let elapsedMillis: number;
+            [elapsedMillis, pos] = history.get(i);
+            timeInPast += elapsedMillis;
+        }
+        return pos;
+    }
+
     private calculateNewTargets(boundingBox: BoundingBox) {
         for (const player of this.players) {
             if (player.isFollowing()) {
@@ -431,8 +447,22 @@ class State {
                 );
                 targets.forEach(target => boundingBox?.expand(target));
                 player.target.set(targets[0]);
+
+                if (player.reactionTime.value > 0) {
+                    const perceivedTargets = State.calculateTargets(
+                        player.position.value,
+                        State.getHistoricalPosition(player.rawFollowing(this, 0), player.reactionTime.value),
+                        State.getHistoricalPosition(player.rawFollowing(this, 1), player.reactionTime.value),
+                    );
+                    perceivedTargets.forEach(target => boundingBox?.expand(target));
+                    player.perceivedTarget.set(perceivedTargets[0]);
+                }
+                else {
+                    player.perceivedTarget.set(player.target.value);
+                }
             }
             else {
+                player.perceivedTarget.set(null);
                 player.target.set(null);
             }
         }
@@ -440,9 +470,9 @@ class State {
 
     private calculateNewPositions(elapsedMillis: number, boundingBox: BoundingBox) {
         for (const player of this.players) {
-            if (player.target.value != null) {
+            if (player.perceivedTarget.value != null) {
                 const targetVector =
-                    Vector.between(player.position.value, player.target.value);
+                    Vector.between(player.position.value, player.perceivedTarget.value);
                 // All coordinate units are cm; speed is m/s
                 let distance = player.speed.value * elapsedMillis / 10;
                 if (targetVector.distance() > distance) {
@@ -451,13 +481,13 @@ class State {
                             .add(targetVector.normalize().multiply(distance)));
                 }
                 else {
-                    player.position.set(player.target.value);
+                    player.position.set(player.perceivedTarget.value);
                 }
                 player.history.update(history => {
-                    history.push(player.position.value);
+                    history.unshift([elapsedMillis, player.position.value]);
 
                     while (history.size() > this.historyLength.value) {
-                        history.shift();
+                        history.pop();
                     }
 
                     return history;

@@ -9,7 +9,7 @@
   import { EditingState } from "./view.js";
 
   let frameCallbackId: number;
-  let running: boolean = true;
+  let running: boolean = false;
 
   let state = createStateDisplay();
   let editingState = new EditingState(state);
@@ -51,7 +51,7 @@
 
   onMount(() => {
     state.updatePositions(0);
-    run();
+    //run();
     return () => stop();
   });
 

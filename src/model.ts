@@ -99,7 +99,7 @@ export class Player {
     }
 
     isMoving =
-        derived([this.active, this.perceivedTarget, this.position],
+        derived([this.active, this.target, this.position],
             ([active, target, position]) =>
                 Player.isMovingRaw(active, target, position));
 
@@ -504,7 +504,7 @@ class State {
         this.moving.set(
             this.players.some(player => Player.isMovingRaw(
                 player.active.value,
-                player.perceivedTarget.value,
+                player.target.value,
                 player.position.value)));
     }
 
@@ -567,6 +567,7 @@ class State {
                             "position": player.position.value,
                             "following": player.getFollowingIds(),
                             "speed": player.speed.value,
+                            "reactionTime": player.reactionTime.value,
                         }
                     })
             },
@@ -591,6 +592,7 @@ class State {
             let player = State._addPlayer(players,
                 new Position(...playerObj.position as [number, number]));
             player.speed.set(playerObj.speed);
+            player.reactionTime.set(playerObj.reactionTime)
             ++nextPlayerId;
         }
 
@@ -603,6 +605,7 @@ class State {
         // and recalculate targets.
         this.players = players;
         this.calculateNewTargets(null);
+        this.calculateMoving();
     }
 }
 
@@ -615,12 +618,70 @@ function addPlayer(state: State, following0: PlayerId, following1: PlayerId, x: 
 export function createStateDisplay(): StateDisplay {
     let state = new State();
 
-    addPlayer(state, 1, 2, 1000 / 2, 1000 / 2);
-    addPlayer(state, 0, 2, 2000 / 2, 1000 / 2);
-    addPlayer(state, 1, 3, 1000 / 2, 2000 / 2);
-    addPlayer(state, 0, 4, 3000 / 2, 2000 / 2);
-    addPlayer(state, 3, 2, 1000 / 2, 2000 / 2);
-    addPlayer(state, 4, 3, 1000 / 2, 2000 / 2);
+    state.import(`
+    {
+        "players": [
+          {
+            "id": 6,
+            "position": [
+              260.5910378250785,
+              465.3298415358428
+            ],
+            "following": [
+              7,
+              8
+            ],
+            "speed": 0.5,
+            "reactionTime": 0
+          },
+          {
+            "id": 7,
+            "position": [
+              706.4416749313494,
+              -46.95046058239177
+            ],
+            "following": [
+              8,
+              6
+            ],
+            "speed": 0.5,
+            "reactionTime": 0
+          },
+          {
+            "id": 8,
+            "position": [
+              574.132831153548,
+              690.6880054906802
+            ],
+            "following": [
+              7,
+              6
+            ],
+            "speed": 0.5,
+            "reactionTime": 0
+          },
+          {
+            "id": 9,
+            "position": [
+              1212.9742350603046,
+              586.8272864506247
+            ],
+            "following": [
+              8,
+              7
+            ],
+            "speed": 0.5,
+            "reactionTime": 10
+          }
+        ]
+      }
+            `)
+    // addPlayer(state, 1, 2, 1000 / 2, 1000 / 2);
+    // addPlayer(state, 0, 2, 2000 / 2, 1000 / 2);
+    // addPlayer(state, 1, 3, 1000 / 2, 2000 / 2);
+    // addPlayer(state, 0, 4, 3000 / 2, 2000 / 2);
+    // addPlayer(state, 3, 2, 1000 / 2, 2000 / 2);
+    // addPlayer(state, 4, 3, 1000 / 2, 2000 / 2);
 
     return new StateDisplay(state);
 }

@@ -81,86 +81,88 @@
     const FOLLOWING_HITBOX_RADIUS = 10;
 </script>
 
-{#if displayMode == "history"}
-    <polyline class="history" points={$historyPoints} stroke-width="2" />
-{:else if displayMode == "targets" || displayMode == "selection"}
-    {#if $target != null}
-        <g class="target {displayMode} {selectedClass}">
-            <polygon
-                class="triangle"
-                points="
+{#if $active}
+    {#if displayMode == "history"}
+        <polyline class="history" points={$historyPoints} stroke-width="2" />
+    {:else if displayMode == "targets" || displayMode == "selection"}
+        {#if $target != null}
+            <g class="target {displayMode} {selectedClass}">
+                <polygon
+                    class="triangle"
+                    points="
                     {$target.x},{$target.y},
                     {$followingPosition0.x},{$followingPosition0.y},
                     {$followingPosition1.x},{$followingPosition1.y}"
-                stroke-width="2"
-            />
-            {#if $isMoving}
-                <circle
-                    class="target"
-                    cx={$perceivedTarget.x}
-                    cy={$perceivedTarget.y}
-                    r="5"
+                    stroke-width="2"
                 />
-                {#if Vector.between($position, $perceivedTarget).distance() > arrowWidth}
-                    <line
+                {#if $isMoving}
+                    <circle
                         class="target"
-                        x1={$position.x}
-                        y1={$position.y}
-                        x2={$perceivedTarget.x}
-                        y2={$perceivedTarget.y}
-                        stroke-width="2"
+                        cx={$perceivedTarget.x}
+                        cy={$perceivedTarget.y}
+                        r="5"
                     />
+                    {#if Vector.between($position, $perceivedTarget).distance() > arrowWidth}
+                        <line
+                            class="target"
+                            x1={$position.x}
+                            y1={$position.y}
+                            x2={$perceivedTarget.x}
+                            y2={$perceivedTarget.y}
+                            stroke-width="2"
+                        />
+                    {/if}
+                    <text
+                        class="target {selectedClass}"
+                        x={$perceivedTarget.x - TEXT_OFFSET * 2}
+                        y={$perceivedTarget.y - TEXT_OFFSET}>{player.id}</text
+                    >
                 {/if}
-                <text
-                    class="target {selectedClass}"
-                    x={$perceivedTarget.x - TEXT_OFFSET * 2}
-                    y={$perceivedTarget.y - TEXT_OFFSET}>{player.id}</text
-                >
-            {/if}
-        </g>
-    {/if}
-{:else if displayMode == "player" && $active}
-    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-    <g
-        pointer-events={selectablePointerEvents}
-        on:mouseover={() => controller.mouseOver(player)}
-        on:mouseout={() => controller.mouseOut(player)}
-        on:mousedown={() => controller.mouseDown(player)}
-        on:mousemove={(event) => controller.mouseMove(player, event)}
-        on:mouseup={() => controller.mouseUp(player)}
-        class="player {selectedClass}"
-    >
-        <circle cx={$position.x} cy={$position.y} r={PLAYER_RADIUS} />
-        <text x={$position.x + TEXT_OFFSET} y={$position.y - TEXT_OFFSET}
-            >{player.id}</text
+            </g>
+        {/if}
+    {:else if displayMode == "player"}
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <g
+            pointer-events={selectablePointerEvents}
+            on:mouseover={() => controller.mouseOver(player)}
+            on:mouseout={() => controller.mouseOut(player)}
+            on:mousedown={() => controller.mouseDown(player)}
+            on:mousemove={(event) => controller.mouseMove(player, event)}
+            on:mouseup={() => controller.mouseUp(player)}
+            class="player {selectedClass}"
         >
-        <circle
-            class="hitbox {selectedClass}"
-            cx={$position.x}
-            cy={$position.y}
-            r={PLAYER_HITBOX_RADIUS / zoom}
-            stroke-width={Math.min(1, 1 / zoom)}
-        />
-    </g>
-    {#if $showFollowingSelectors && !$selected}
-        <circle
-            pointer-events={selectablePointerEvents}
-            on:click={() => controller.clickFollowing(0, player)}
-            class="following {following1Class}"
-            cx={$position.x + FOLLOWING_SELECTOR_OFFSET / zoom}
-            cy={$position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
-            r={FOLLOWING_HITBOX_RADIUS / zoom}
-            stroke-width={Math.min(1, 1 / zoom)}
-        />
-        <circle
-            pointer-events={selectablePointerEvents}
-            on:click={() => controller.clickFollowing(1, player)}
-            class="following {following2Class}"
-            cx={$position.x - FOLLOWING_SELECTOR_OFFSET / zoom}
-            cy={$position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
-            r={FOLLOWING_HITBOX_RADIUS / zoom}
-            stroke-width={Math.min(1, 1 / zoom)}
-        />
+            <circle cx={$position.x} cy={$position.y} r={PLAYER_RADIUS} />
+            <text x={$position.x + TEXT_OFFSET} y={$position.y - TEXT_OFFSET}
+                >{player.id}</text
+            >
+            <circle
+                class="hitbox {selectedClass}"
+                cx={$position.x}
+                cy={$position.y}
+                r={PLAYER_HITBOX_RADIUS / zoom}
+                stroke-width={Math.min(1, 1 / zoom)}
+            />
+        </g>
+        {#if $showFollowingSelectors && !$selected}
+            <circle
+                pointer-events={selectablePointerEvents}
+                on:click={() => controller.clickFollowing(0, player)}
+                class="following {following1Class}"
+                cx={$position.x + FOLLOWING_SELECTOR_OFFSET / zoom}
+                cy={$position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
+                r={FOLLOWING_HITBOX_RADIUS / zoom}
+                stroke-width={Math.min(1, 1 / zoom)}
+            />
+            <circle
+                pointer-events={selectablePointerEvents}
+                on:click={() => controller.clickFollowing(1, player)}
+                class="following {following2Class}"
+                cx={$position.x - FOLLOWING_SELECTOR_OFFSET / zoom}
+                cy={$position.y + FOLLOWING_SELECTOR_OFFSET / zoom}
+                r={FOLLOWING_HITBOX_RADIUS / zoom}
+                stroke-width={Math.min(1, 1 / zoom)}
+            />
+        {/if}
     {/if}
 {/if}
 

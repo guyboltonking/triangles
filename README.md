@@ -1,48 +1,60 @@
-# Svelte + TS + Vite
+# Triangles
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+This simulates a thing you may have heard of, which goes like this:
 
-## Recommended IDE Setup
+* Get a bunch of folk together in an open space;
+* Each person chooses two other people to follow;
+* Once things get moving, each person must try to position such that they form an apex of an equilateral triangle formed by themselves and the two people they are following;
+* Things get moving.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+What happens?
 
-## Need an official Svelte framework?
+The point of the simulation is to try and answer that question.  It isn't to stop you from doing the thing, which you definitely should do, because it's fun.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+# Caveats
 
-## Technical considerations
+* Mobile/touch unfriendly: sorry, mouse needed at the moment;
+* Floating point rounding errors can cause odd behaviour at small distances; in particular, when players all end up near the same position they can end up jiggling about forever, or ending up in a state where they all head off in different directions (at which point the simulation is correct, but the state it went through to get there should arguably not happen).
 
-**Why use this over SvelteKit?**
+# Usage
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-  `vite dev` and `vite build` wouldn't work in a SvelteKit environment, for example.
+The display is split up into a **controls** area at the top and a **playfield** at the bottom.
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+## Playfield
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+This shows:
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+* A grid of 1m squares;
+* Players, represented by black discs with the player number next to them;
+* Targets: where each player is trying to get to to make a triangle with the players they are following.  These are represented by a red circle with the player number next to it, with a red dotted arrow from the player to the target;
+* Triangles: the triangles that would be made once each player reaches their target;
+* Paths: a brown dashed line showing where the player has been.  This is currently keeps 17 seconds-worth of positions; positions older than that will disappear.
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+The simulation starts with a pre-loaded set of players.
 
-**Why include `.vscode/extensions.json`?**
+Hovering the cursor over a player will highlight the triangle, the target and the track to the target.
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+The playfield is automatically zoomed and panned to keep all players and targets in view.
 
-**Why enable `allowJs` in the TS template?**
+## Controls
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+The controls are in a continuous row that will wrap depending on the width of the screen; from left-to-right these are:
 
-**Why is HMR not preserving my local component state?**
+* The play/pause button starts and stops the simulation;
+* The edit button shows the player data in JSON format; you can edit it (using the **Save** button to save it, or **Cancel** to abandon changes; sorry, there is no help if you create invalid data!), and/or copy and paste it somewhere to save "interesting" states;
+* **Zoom** controls how the Playfield is auto-zoomed to keep all the players in view: you can either tell the system to keep them in view until the zoom level is 1 pixel-per-cm (Screen), or keep zooming to keep all the players in view (Players); the current zoom level is also show;
+* **FPS** just shows how many frames-per-second the simulation is managing;
+* The editing mode controls how mouse clicks work:
+  * **Modify**: Clicking on a player will show the player editing controls (see below); clicking on the background will deselect the player; dragging a player will change its position;
+  * **Add**: Like Modify, except that a click on the background will create a new player;
+  * **Delete**: Clicking a player will delete it;
+  * Note that deleting a player removes that player's number from use; new players will not end up with that number.
+* Player editing controls:
+  * When a player is selected, the players they are following are indicated by filled blue circles underneath those players;
+  * You can change which players are being followed by clicking on the blue circles under the players; there are two circles: this allows you to select the first player followed by clicking on the left circle, and the second by clicking on the right;
+  * If a player isn't following two other players, they won't move;
+  * As already mentioned, dragging a player changes the position;
+  * **Speed** controls how fast (in m/s) each player moves towards their target; once they've reached the target, they'll keep pace with it as long as the target is moving slower than the player speed;
+  * **Reaction Time** (in seconds) is how fast the player responds to movements of the players being followed; this is modelled by calculating the target based on the position of the followed players that many seconds ago.
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+To reset everything, reload the page.

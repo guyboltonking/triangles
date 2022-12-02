@@ -622,53 +622,53 @@ export function createStateDisplay(): StateDisplay {
     {
         "players": [
           {
-            "id": 6,
+            "id": 1,
             "position": [
               260.5910378250785,
               465.3298415358428
             ],
             "following": [
-              7,
-              8
+              2,
+              3
             ],
             "speed": 0.5,
             "reactionTime": 0
           },
           {
-            "id": 7,
+            "id": 2,
             "position": [
               706.4416749313494,
               -46.95046058239177
             ],
             "following": [
-              8,
-              6
+              3,
+              1
             ],
             "speed": 0.5,
             "reactionTime": 0
           },
           {
-            "id": 8,
+            "id": 3,
             "position": [
               574.132831153548,
               690.6880054906802
             ],
             "following": [
-              7,
-              6
+              2,
+              1
             ],
             "speed": 0.5,
             "reactionTime": 0
           },
           {
-            "id": 9,
+            "id": 4,
             "position": [
               1212.9742350603046,
               586.8272864506247
             ],
             "following": [
-              8,
-              7
+              3,
+              2
             ],
             "speed": 0.5,
             "reactionTime": 10

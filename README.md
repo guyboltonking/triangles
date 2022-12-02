@@ -6,7 +6,7 @@ This simulates a thing you may have heard of, which goes like this:
 
 * Get a bunch of folk together in an open space;
 * Each person chooses two other people to follow;
-* Once things get moving, each person must try to position such that they form an apex of an equilateral triangle formed by themselves and the two people they are following;
+* Once things get moving, each person must try to position themself such that they form an apex of an equilateral triangle formed by themself and the two people they are following;
 * Things get moving.
 
 What happens?
